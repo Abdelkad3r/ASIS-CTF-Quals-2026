@@ -1,0 +1,612 @@
+<title>ASIS Arch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap">
+
+<style>
+  /* ---- tokens: light is the base; both dark states redefine ---- */
+  :root {
+    --ground: #EDEFF3;
+    --surface: #FDFDFE;
+    --panel: #F4F6F9;
+    --ink: #12161C;
+    --muted: #5A626E;
+    --line: #D5DAE3;
+    --line-soft: #E4E8EE;
+    --accent: #A6331F;
+    --accent-soft: #F6E7E3;
+    --signal: #26527F;
+    --signal-soft: #E4EBF4;
+    --ok: #2C6844;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1116;
+      --surface: #161A21;
+      --panel: #12161C;
+      --ink: #E2E6EC;
+      --muted: #8B93A0;
+      --line: #242A33;
+      --line-soft: #1C222A;
+      --accent: #F0755C;
+      --accent-soft: #2C1C18;
+      --signal: #86B0DF;
+      --signal-soft: #16202C;
+      --ok: #6FC08D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1116;
+    --surface: #161A21;
+    --panel: #12161C;
+    --ink: #E2E6EC;
+    --muted: #8B93A0;
+    --line: #242A33;
+    --line-soft: #1C222A;
+    --accent: #F0755C;
+    --accent-soft: #2C1C18;
+    --signal: #86B0DF;
+    --signal-soft: #16202C;
+    --ok: #6FC08D;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 16.5px;
+    line-height: 1.66;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 50rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.1rem, 4vw, 2.4rem) 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  h1, h2, h3, .eyebrow, .chip, th, .idx, .cap {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+  }
+  h1 {
+    font-size: clamp(2.3rem, 6.5vw, 3.3rem);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.03;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h2 { font-size: 1.28rem; font-weight: 600; letter-spacing: -.012em; margin: 0; text-wrap: balance; }
+  h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .35rem; }
+  p { margin: 0; }
+  .lede { font-size: 1.14rem; line-height: 1.55; color: var(--muted); max-width: 42ch; }
+  .eyebrow {
+    font-size: .69rem; font-weight: 600; letter-spacing: .17em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .84em;
+    background: var(--signal-soft);
+    color: var(--signal);
+    padding: .08em .32em;
+    border-radius: 2px;
+  }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  header { display: flex; flex-direction: column; gap: 1.3rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    font-size: .71rem; font-weight: 500; letter-spacing: .03em;
+    padding: .26rem .58rem; border: 1px solid var(--line);
+    border-radius: 2px; color: var(--muted); background: var(--surface);
+  }
+  .chip.mark { color: var(--accent); border-color: var(--accent); }
+
+  /* ---- code / listings ---- */
+  .code, .flagbox {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: .95rem 1.1rem;
+    overflow-x: auto;
+  }
+  .code pre, .flagbox pre {
+    margin: 0;
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .775rem;
+    line-height: 1.62;
+    color: var(--ink);
+  }
+  .cmt { color: var(--muted); }
+  .hl { color: var(--accent); font-weight: 500; }
+  .sig { color: var(--signal); }
+  .cap {
+    display: block; font-size: .66rem; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .flagbox { background: var(--accent-soft); border-color: var(--accent); }
+  .flagbox pre { color: var(--accent); font-size: clamp(.76rem, 2.5vw, 1.02rem); font-weight: 600; }
+
+  /* ---- the specimen: one input, five addresses ---- */
+  .specimen { display: grid; gap: .35rem; }
+  .row {
+    display: grid;
+    grid-template-columns: 5.5rem 8.5rem 1fr;
+    gap: .8rem;
+    align-items: baseline;
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .78rem;
+    padding: .34rem .55rem;
+    border-radius: 2px;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+  }
+  .row .addr { color: var(--muted); }
+  .row .bytes { color: var(--signal); font-weight: 500; }
+  .row.live { border-color: var(--accent); background: var(--accent-soft); }
+  .row.live .insn { color: var(--accent); font-weight: 600; }
+  @media (max-width: 30rem) {
+    .row { grid-template-columns: 1fr; gap: .1rem; }
+  }
+
+  /* ---- decode pipeline diagram ---- */
+  .pipe {
+    display: grid;
+    gap: .55rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1.05rem 1.1rem;
+    overflow-x: auto;
+  }
+  .stage { display: grid; grid-template-columns: 7.5rem 1fr; gap: .8rem; align-items: baseline; }
+  .stage .name {
+    font-family: "IBM Plex Sans", sans-serif; font-size: .7rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  }
+  .stage .body {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .755rem; line-height: 1.55; color: var(--ink);
+  }
+  .stage + .stage { border-top: 1px solid var(--line-soft); padding-top: .55rem; }
+  @media (max-width: 32rem) { .stage { grid-template-columns: 1fr; gap: .1rem; } }
+
+  /* ---- numbered steps ---- */
+  .step {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+    gap: 0 1rem;
+    align-items: baseline;
+    padding-top: 1.9rem;
+    border-top: 1px solid var(--line-soft);
+  }
+  .step .idx {
+    font-size: .76rem; font-weight: 600; color: var(--accent);
+    font-variant-numeric: tabular-nums; letter-spacing: .05em;
+  }
+  .step .body { display: flex; flex-direction: column; gap: .95rem; min-width: 0; }
+  @media (max-width: 34rem) { .step { grid-template-columns: 1fr; gap: .3rem; } }
+
+  .scroll { overflow-x: auto; }
+  table {
+    border-collapse: collapse; width: 100%;
+    font-size: .84rem; font-variant-numeric: tabular-nums;
+  }
+  th, td { text-align: left; padding: .42rem .65rem; border-bottom: 1px solid var(--line-soft); }
+  th {
+    font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td.mono, th.mono {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .77rem; white-space: nowrap;
+  }
+  td.mono.op { color: var(--signal); }
+
+  .prose { display: flex; flex-direction: column; gap: 1rem; }
+  ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .5rem; }
+  li::marker { color: var(--accent); }
+
+  .note {
+    border-left: 2px solid var(--signal);
+    padding: .05rem 0 .05rem 1rem;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .note h3 { color: var(--signal); }
+
+  footer {
+    border-top: 1px solid var(--line-soft);
+    padding-top: 1.3rem; font-size: .83rem; color: var(--muted);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">ASIS CTF Quals 2026 &middot; Rev</span>
+    <h1>ASIS Arch</h1>
+    <p class="lede">A 2.5&nbsp;KB VM whose instructions are encrypted with the address they
+      sit at &mdash; so the same four bytes are a different instruction everywhere.</p>
+    <div class="meta">
+      <span class="chip">custom ISA</span>
+      <span class="chip">26 opcodes</span>
+      <span class="chip">16-bit</span>
+      <span class="chip">no solver needed</span>
+      <span class="chip mark">solved</span>
+    </div>
+    <div class="flagbox">
+      <span class="cap">Flag</span>
+      <pre>ASIS{M1ddL3_3nd14n_N1bbL35_M4k3_Q3MU_D122y!}</pre>
+    </div>
+  </header>
+
+  <section class="prose">
+    <h2>The whole challenge in one specimen</h2>
+    <p>These four bytes are the first instruction in the ROM. Here is what they decode to at
+      other addresses:</p>
+    <div class="specimen">
+      <div class="row live"><span class="addr">@0x0000</span><span class="bytes">c3 3a 7c 4f</span><span class="insn">li r6, 0x7c60</span></div>
+      <div class="row"><span class="addr">@0x0048</span><span class="bytes">c3 3a 7c 4f</span><span class="insn">stb [r5+0x1298], r6</span></div>
+      <div class="row"><span class="addr">@0x0058</span><span class="bytes">c3 3a 7c 4f</span><span class="insn">out r6</span></div>
+      <div class="row"><span class="addr">@0x00b4</span><span class="bytes">c3 3a 7c 4f</span><span class="insn">halt</span></div>
+      <div class="row"><span class="addr">@0x010c</span><span class="bytes">c3 3a 7c 4f</span><span class="insn">xori r3, 0xffd0</span></div>
+      <div class="row"><span class="addr">@0x1000</span><span class="bytes">c3 3a 7c 4f</span><span class="insn cmt">illegal instruction</span></div>
+    </div>
+    <p>Only 1664 of the 16384 aligned addresses decode them to anything legal at all. Every
+      byte of the ROM is welded to its address, which is why a linear sweep produces
+      convincing nonsense and never resynchronises.</p>
+  </section>
+
+  <section class="step">
+    <span class="idx">01</span>
+    <div class="body">
+      <h2>Recon &mdash; the emulator is not QEMU</h2>
+      <p>Real QEMU is measured in megabytes. This is 14&nbsp;KB, stripped, and the section
+        table gives the game away before a single instruction is read:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Section</th><th class="mono">Size</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">.text</td><td class="mono">0x9f5</td><td>the entire CPU, 2549 bytes</td></tr>
+            <tr><td class="mono">.rodata</td><td class="mono">0x260</td><td>decode tables and strings</td></tr>
+            <tr><td class="mono">.data.rel.ro</td><td class="mono">0x800</td><td><strong>256 &times; 8</strong> &mdash; an opcode dispatch table</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A 2&nbsp;KB array of function pointers indexed by a byte is the shape of an
+        interpreter dispatch. Count the table before reading the handlers: it <em>is</em>
+        the instruction set. The strings agree &mdash; <code>illegal instruction</code>,
+        <code>PC out of bounds</code>, <code>guest cycle limit exceeded</code>,
+        <code>ROM checksum mismatch</code>.</p>
+      <div class="code">
+        <span class="cap">Behaviour</span>
+<pre><span class="cmt">$</span> echo 'ASIS{aaaa}' | ./qemu-asisarch -M asisboard -kernel challenge.rom -nographic
+=== ASISARCH Secure Enclave v2.0 ===
+Enter flag:
+[-] Access Denied. Invalid flag.</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">02</span>
+    <div class="body">
+      <h2>The ROM container</h2>
+      <p>A 32-byte header is validated before the body is copied to guest address 0:</p>
+      <div class="code">
+<pre>+0x00  "AARQ"       magic
++0x04  02           version, must be 2
++0x08  byte lo      entry PC, low half  <span class="cmt">(scrambled)</span>
++0x09  byte hi      entry PC, high half <span class="cmt">(scrambled)</span>
++0x0c  uint32       checksum over the body
++0x20  image        body, at most 0x10000 bytes</pre>
+      </div>
+      <p>The entry point is not stored directly. It is assembled by swapping the nibbles of
+        each header byte and rotating the result &mdash; the same scramble that decodes
+        every instruction immediate, and the thing the flag calls
+        <em>middle-endian nibbles</em>:</p>
+      <div class="code">
+<pre>entry = rol16((rol8(hdr[9], 4) &lt;&lt; 8) | rol8(hdr[8], 4), 5)   <span class="cmt"># = 0x0000</span></pre>
+      </div>
+      <p>The checksum is a 16-bit rolling XOR seeded with <code>0x31415926</code>. Worth
+        reimplementing even though it is not in the way &mdash; without it you cannot
+        rebuild a patched ROM.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">03</span>
+    <div class="body">
+      <h2>Machine state</h2>
+      <p>The whole machine is one flat allocation, so the layout reads straight off the
+        offsets used in <code>.text</code>:</p>
+      <div class="code">
+<pre>0x00000 .. 0x0ffff   RAM, 64 KiB
+0x10000 .. 0x1000f   r0 .. r7, 16-bit each
+0x10010              SP, initialised to 0xfff0
+0x10012              PC
+0x10018              cycle counter, aborts above 10_000_000</pre>
+      </div>
+      <p>Sixteen-bit registers, byte-addressed little-endian memory, and no flags register
+        &mdash; conditional branches test a register directly.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">04</span>
+    <div class="body">
+      <h2>The fetch stage</h2>
+      <p>This is the challenge. Before anything is decoded, the fetch stage derives a
+        keystream from the program counter itself, and every field of the instruction is
+        unmasked with it:</p>
+      <div class="pipe">
+        <div class="stage">
+          <span class="name">Keystream</span>
+          <span class="body">raw = ((PC ^ 0x9e37) * 0x1039 + 0x79b9) &amp; 0xffff<br>
+            sel = (raw &gt;&gt; 14) &amp; 3 &nbsp;&nbsp;<span class="cmt">// one of four byte orders</span><br>
+            k&nbsp;&nbsp; = rol16(raw, 5)</span>
+        </div>
+        <div class="stage">
+          <span class="name">Permute</span>
+          <span class="body">b0..b3 = the four fetched bytes, reordered by sel<br>
+            <span class="cmt">sel 0: [0,1,2,3] &nbsp; sel 1: [2,0,3,1] &nbsp; sel 2: [3,2,1,0] &nbsp; sel 3: [1,3,0,2]</span></span>
+        </div>
+        <div class="stage">
+          <span class="name">Opcode</span>
+          <span class="body">op = rol8((0x5d * PC ^ k ^ b2) &amp; 0xff, (k &gt;&gt; 5) &amp; 7) ^ 0x6d</span>
+        </div>
+        <div class="stage">
+          <span class="name">Register</span>
+          <span class="body">x&nbsp; = (7 * PC ^ (k &gt;&gt; 2) ^ b0) &amp; 0xff<br>
+            rd = ((5 * (((5 * x) ^ 3) &amp; 7)) ^ 3) &amp; 7</span>
+        </div>
+        <div class="stage">
+          <span class="name">Immediate</span>
+          <span class="body">imm = rol16((rol8((b3 ^ (k &gt;&gt; 8)) &amp; 0xff, 4) &lt;&lt; 8)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| rol8((b1 ^ k) &amp; 0xff, 4), 5)</span>
+        </div>
+      </div>
+      <p>The second register operand is not in the instruction at all. It is packed into the
+        low three bits of the immediate, through the same permutation, leaving thirteen bits
+        as an address displacement:</p>
+      <div class="code">
+<pre>rs   = ((5 * (imm &amp; 7)) ^ 3) &amp; 7
+disp = imm &gt;&gt; 3</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">05</span>
+    <div class="body">
+      <h2>Recovering the opcode map without guessing</h2>
+      <p>The dispatch table is zero-filled on disk &mdash; it is a table of pointers in a
+        position-independent executable, populated at load time. The opcode numbers are
+        therefore sitting in the relocation table, and can be read out statically:</p>
+      <div class="code">
+<pre>for reloc in .rela.dyn:
+    if reloc.type == R_X86_64_RELATIVE and reloc.offset in dispatch_table:
+        opcode = (reloc.offset - table_base) // 8
+        handler = reloc.addend        <span class="cmt"># 26 live, 230 null -&gt; illegal</span></pre>
+      </div>
+      <div class="note">
+        <h3>Why this matters</h3>
+        <p>No debugger, no execution, no guessing about which entries are real. The same
+          pass lifts the S-box and the byte-permutation table out of <code>.rodata</code>,
+          so the only human input left is naming the 26 handler addresses.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">06</span>
+    <div class="body">
+      <h2>The instruction set</h2>
+      <p>Arithmetic is written with the carry-free identity
+        <code>x + y == (x ^ y) + 2*(x &amp; y)</code>, so neither <code>add</code> nor
+        <code>sub</code> looks like arithmetic at a glance. And <code>sbox</code> is a
+        substitution instruction with no equivalent on any real CPU &mdash; the first hint
+        that the ROM is doing block-cipher work.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">Op</th><th>Mnemonic</th><th>Semantics</th></tr></thead>
+          <tbody>
+            <tr><td class="mono op">0x15</td><td class="mono">li rd, imm</td><td>rd = imm</td></tr>
+            <tr><td class="mono op">0x21</td><td class="mono">addi rd, imm</td><td>rd += imm</td></tr>
+            <tr><td class="mono op">0x27</td><td class="mono">subi rd, imm</td><td>rd -= imm</td></tr>
+            <tr><td class="mono op">0x32</td><td class="mono">xori rd, imm</td><td>rd ^= imm</td></tr>
+            <tr><td class="mono op">0x38</td><td class="mono">andi rd, imm</td><td>rd &amp;= imm</td></tr>
+            <tr><td class="mono op">0x44</td><td class="mono">roli rd, imm</td><td>rd = rol16(rd, imm &amp; 15)</td></tr>
+            <tr><td class="mono op">0x4b</td><td class="mono">mov rd, rs</td><td>rd = rs</td></tr>
+            <tr><td class="mono op">0x50</td><td class="mono">add rd, rs</td><td>rd += rs</td></tr>
+            <tr><td class="mono op">0x56</td><td class="mono">sub rd, rs</td><td>rd -= rs</td></tr>
+            <tr><td class="mono op">0x5c</td><td class="mono">xor rd, rs</td><td>rd ^= rs</td></tr>
+            <tr><td class="mono op">0x63</td><td class="mono">ldb rd, [rs+disp]</td><td>zero-extending byte load</td></tr>
+            <tr><td class="mono op">0x69</td><td class="mono">stb [rs+disp], rd</td><td>byte store</td></tr>
+            <tr><td class="mono op">0x71</td><td class="mono">ldw rd, [rs+disp]</td><td>16-bit little-endian load</td></tr>
+            <tr><td class="mono op">0x77</td><td class="mono">stw [rs+disp], rd</td><td>16-bit little-endian store</td></tr>
+            <tr><td class="mono op">0x80</td><td class="mono">jmp imm</td><td>PC = imm</td></tr>
+            <tr><td class="mono op">0x86</td><td class="mono">jz rd, imm</td><td>jump if rd == 0</td></tr>
+            <tr><td class="mono op">0x8c</td><td class="mono">jnz rd, imm</td><td>jump if rd != 0</td></tr>
+            <tr><td class="mono op">0x92</td><td class="mono">push rd</td><td>SP -= 2, store word</td></tr>
+            <tr><td class="mono op">0x98</td><td class="mono">pop rd</td><td>load word, SP += 2</td></tr>
+            <tr><td class="mono op">0xa1</td><td class="mono">call imm</td><td>push PC+4, PC = imm</td></tr>
+            <tr><td class="mono op">0xa7</td><td class="mono">ret</td><td>pop into PC</td></tr>
+            <tr><td class="mono op">0xb3</td><td class="mono">in rd</td><td>rd = getc(stdin), EOF reads as 0</td></tr>
+            <tr><td class="mono op">0xb9</td><td class="mono">out rd</td><td>putc(rd &amp; 0xff)</td></tr>
+            <tr><td class="mono op">0xc2</td><td class="mono">sbox rd</td><td>substitute both halves through a 256-byte permutation</td></tr>
+            <tr><td class="mono op">0xfe</td><td class="mono">halt</td><td>stop</td></tr>
+            <tr><td class="mono op">0x10</td><td class="mono">nop</td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">07</span>
+    <div class="body">
+      <h2>Build an emulator, then prove it right</h2>
+      <p>A reimplementation that merely produces the same text has only exercised the I/O
+        path. Matching the <em>cycle count</em> on both the accepting and the rejecting run
+        exercises every instruction the ROM actually uses:</p>
+      <div class="code">
+<pre><span class="cmt">$</span> echo 'ASIS{aaaaaaaa}' | python3 asisarch.py
+=== ASISARCH Secure Enclave v2.0 ===
+Enter flag:
+[-] Access Denied. Invalid flag.
+<span class="sig">[614 cycles]</span>   <span class="cmt"># byte-identical to the reference binary</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">08</span>
+    <div class="body">
+      <h2>Disassembling the ROM</h2>
+      <p>Linear sweep is useless, so the disassembler is recursive descent: start at the
+        header's entry PC and follow <code>jmp</code> / <code>jz</code> / <code>jnz</code> /
+        <code>call</code>, stopping at <code>ret</code> and <code>halt</code>. That reaches
+        7960 instructions &mdash; essentially the whole image, with nothing hidden behind
+        computed jumps.</p>
+      <div class="code">
+        <span class="cap">Entry point</span>
+<pre>0000:  li r6, 0x7c60      <span class="cmt">; banner</span>
+0004:  call 0x7c04        <span class="cmt">; puts</span>
+0008:  li r6, 0x7c86      <span class="cmt">; "Enter flag: "</span>
+000c:  call 0x7c04
+0010:  li r6, 0xc000      <span class="cmt">; input buffer</span>
+0014:  call 0x7c1c        <span class="cmt">; readline -&gt; length in r3</span>
+0018:  li r1, 0x002c
+001c:  sub r1, r3
+0020:  <span class="hl">jnz r1, 0x7bf8</span>     <span class="cmt">; length != 44 -&gt; reject</span></pre>
+      </div>
+      <p>The flag is exactly <strong>44 bytes</strong>, buffered at <code>0xc000</code>
+        &mdash; 22 sixteen-bit words.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">09</span>
+    <div class="body">
+      <h2>The verification routine</h2>
+      <p>Between the length check and the comparison sits one enormous basic block,
+        <code>0x0024</code> to <code>0x7873</code>, fully unrolled, with no branches at all.
+        Lifting it shows 660 stores to the buffer in three repeating shapes, 220 each
+        &mdash; <strong>ten rounds of three passes over 22 words</strong>:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Pass</th><th>Operation</th></tr></thead>
+          <tbody>
+            <tr><td>Substitute</td><td class="mono">w[i] = S16(w[i]) ^ K[round][i]</td></tr>
+            <tr><td>Diffuse forward</td><td class="mono">w[i] = w[i] + w[i-1 mod 22] + 0x5a5a</td></tr>
+            <tr><td>Diffuse backward</td><td class="mono">w[i] ^= &sigma;(w[i+1]) ^ rol(&sigma;(w[i+2]), r)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>with <code>&sigma;(x) = x ^ rol(x,5) ^ rol(x,11)</code>, 220 distinct round
+        constants, and a rotation <code>r</code> that increases every round. One pass
+        propagates changes up the buffer and the other propagates them down, so after two
+        rounds every output word depends on every input byte. Guessing the flag piecewise is
+        hopeless.</p>
+      <p>The comparison then repeats 22 times:</p>
+      <div class="code">
+<pre>7b20:  li r6, 0xc022        <span class="cmt">; a transformed word</span>
+7b24:  ldw r3, [r6+0x0]
+7b28:  li r1, 0x7cdb        <span class="cmt">; constant table</span>
+7b2c:  addi r1, 0x0058      <span class="cmt">; ... at a shuffled offset</span>
+7b30:  ldw r4, [r1+0x0]
+7b34:  addi r1, 0x0002
+7b38:  ldw r7, [r1+0x0]
+7b3c:  xor r4, r7           <span class="cmt">; expected = tbl[off] ^ tbl[off+2]</span>
+7b40:  xor r3, r4
+7b44:  <span class="hl">add r5, r3</span>           <span class="cmt">; accumulate the difference</span></pre>
+      </div>
+      <p>No expected word is stored in the clear &mdash; each is the XOR of two entries of a
+        176-byte table, read at offsets that hop around it. Differences are accumulated
+        rather than compared one at a time, so there is no early exit to time and no
+        per-word oracle.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">10</span>
+    <div class="body">
+      <h2>Inverting the transform</h2>
+      <p>The winning observation is that the transform has <strong>no branches</strong>, so
+        its sequence of buffer updates is the same whatever the input is. It can be lifted
+        once, symbolically, by walking the block with an expression per register instead of a
+        value. Buffer loads produce the symbol <code>B[i]</code>; each store emits a step and
+        resets that symbol, so every step is written against the <em>current</em> buffer
+        rather than the original input:</p>
+      <div class="code">
+<pre><span class="sig">elif</span> name == "ldw":
+    sym[rd] = (<span class="hl">"B"</span>, (a - BUF) // 2) <span class="sig">if</span> in_buffer(a) <span class="sig">else</span> (<span class="hl">"C"</span>, word_at(a))
+<span class="sig">elif</span> name == "stw":
+    steps.append(((a - BUF) // 2, sym[rd]))</pre>
+      </div>
+      <p>The result is 660 steps of the form
+        <code>buf[i] &lt;- f(buf[i], other words, constants)</code> with <code>f</code> built
+        only from xor, add, rotate and S-box. Two properties make them trivially
+        invertible:</p>
+      <ul>
+        <li>every step mentions its own target <strong>exactly once</strong> &mdash; asserted
+          by the solver &mdash; so that occurrence can be isolated by peeling operations from
+          the outside in;</li>
+        <li>the other words a step reads are not modified by that step, so when replaying
+          backwards their post-values are also their pre-values.</li>
+      </ul>
+      <p>Undo xor with xor, add with subtraction, rotate with the opposite rotate, S-box with
+        the inverse permutation. Start from the expected words, run the list backwards, and
+        the input falls out:</p>
+      <div class="code">
+<pre><span class="cmt">$</span> python3 solve.py
+[+] lifted 660 elementary buffer updates
+[+] expected words: 544c 15a0 eb44 09d6 b6ab 496e fd0a 3806 f1df 0913 ffd8 ...
+[+] flag: <span class="hl">ASIS{M1ddL3_3nd14n_N1bbL35_M4k3_Q3MU_D122y!}</span>
+[+] emulator says: ACCEPTED (8906 cycles)</pre>
+      </div>
+      <p>No brute force, no SMT solver. The size of the search space never enters into it.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">&mdash;</span>
+    <div class="body">
+      <h2>Takeaways</h2>
+      <ul>
+        <li><strong>Size is the first tell.</strong> A 2.5&nbsp;KB <code>.text</code> beside a
+          2&nbsp;KB pointer table is an interpreter, and that table is the instruction set.
+          Count it before reading a single handler.</li>
+        <li><strong>Recover tables from relocations, not from a debugger.</strong> In a PIE,
+          a table of function pointers lives in <code>.rela.dyn</code>. Parsing it yields the
+          opcode map with nothing executed and nothing guessed.</li>
+        <li><strong>Validate a reimplemented VM on cycle counts.</strong> Matching output
+          only proves the I/O path; matching cycles on both paths exercises every
+          instruction the ROM uses.</li>
+        <li><strong>Branch-free obfuscation defeats itself.</strong> Unrolling hides the
+          structure from a reader, but it also removes every input-dependent decision
+          &mdash; which is exactly what lets the operation sequence be lifted once and
+          inverted in closed form. A single data-dependent branch in that block would have
+          forced a solver.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Rev &middot; ASIS Arch</span>
+    <span>Emulator, disassembler and solver: <code>Rev/ASISArch/solution/</code></span>
+  </footer>
+
+</div>
