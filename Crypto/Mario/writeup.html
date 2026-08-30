@@ -1,0 +1,476 @@
+<title>Mario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Karla:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #EDEFEB;
+    --surface: #FBFCFA;
+    --panel: #F3F5F1;
+    --ink: #141915;
+    --muted: #586058;
+    --line: #D6DBD4;
+    --line-soft: #E3E7E1;
+    --structure: #1E5F4E;
+    --structure-soft: #E2EDE8;
+    --accent: #B0246A;
+    --accent-soft: #FAE6EF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101310;
+      --surface: #181C18;
+      --panel: #141814;
+      --ink: #E5E9E4;
+      --muted: #8C948B;
+      --line: #252B25;
+      --line-soft: #1D221D;
+      --structure: #7FC4AC;
+      --structure-soft: #16211C;
+      --accent: #F27BAE;
+      --accent-soft: #2A1620;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101310;
+    --surface: #181C18;
+    --panel: #141814;
+    --ink: #E5E9E4;
+    --muted: #8C948B;
+    --line: #252B25;
+    --line-soft: #1D221D;
+    --structure: #7FC4AC;
+    --structure-soft: #16211C;
+    --accent: #F27BAE;
+    --accent-soft: #2A1620;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Karla", system-ui, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 50rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.1rem, 4vw, 2.4rem) 6rem;
+    display: flex; flex-direction: column; gap: 2.5rem;
+  }
+
+  h1, h2, h3 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; margin: 0; }
+  h1 {
+    font-size: clamp(2.9rem, 8.5vw, 4.4rem);
+    line-height: .98; letter-spacing: -.015em; text-wrap: balance;
+  }
+  h2 { font-size: 1.7rem; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0; }
+  .lede {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 1.45rem; line-height: 1.35; color: var(--muted); max-width: 38ch;
+  }
+  .eyebrow, .cap, .chip, th, .idx { font-family: "Karla", system-ui, sans-serif; }
+  .eyebrow {
+    font-size: .69rem; font-weight: 600; letter-spacing: .17em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  strong { font-weight: 600; }
+
+  code {
+    font-family: "DM Mono", ui-monospace, Menlo, monospace;
+    font-size: .84em; background: var(--structure-soft); color: var(--structure);
+    padding: .08em .34em; border-radius: 2px;
+  }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  header { display: flex; flex-direction: column; gap: 1.25rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    font-size: .71rem; font-weight: 500; padding: .26rem .6rem;
+    border: 1px solid var(--line); border-radius: 2px;
+    color: var(--muted); background: var(--surface);
+  }
+  .chip.mark { color: var(--accent); border-color: var(--accent); }
+
+  .code, .flagbox {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 3px; padding: .95rem 1.1rem; overflow-x: auto;
+  }
+  .code pre, .flagbox pre {
+    margin: 0; font-family: "DM Mono", ui-monospace, Menlo, monospace;
+    font-size: .78rem; line-height: 1.65; color: var(--ink);
+  }
+  .cmt { color: var(--muted); }
+  .hl { color: var(--accent); font-weight: 500; }
+  .st { color: var(--structure); }
+  .cap {
+    display: block; font-size: .66rem; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .flagbox { background: var(--accent-soft); border-color: var(--accent); }
+  .flagbox pre { color: var(--accent); font-weight: 500; font-size: clamp(.7rem, 2.3vw, .98rem); }
+
+  /* ---- figure ---- */
+  figure {
+    margin: 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 1.15rem 1.15rem .9rem;
+    display: flex; flex-direction: column; gap: .8rem;
+  }
+  figure svg { max-width: 100%; height: auto; display: block; color: var(--ink); }
+  figcaption { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+  .dg-face { fill: var(--structure-soft); }
+  .dg-line { stroke: currentColor; fill: none; }
+  .dg-faint { stroke: var(--muted); fill: none; opacity: .5; }
+  .dg-accent { stroke: var(--accent); fill: none; }
+  .dg-dot, .dg-head { fill: var(--accent); }
+  .dg-o { fill: var(--structure); }
+  .dg-t { font-family: "Karla", system-ui, sans-serif; font-size: 13px; fill: currentColor; }
+  .dg-s { font-family: "Karla", system-ui, sans-serif; font-size: 11.5px; fill: var(--muted); }
+  .dg-a { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; fill: var(--accent); }
+
+  /* ---- steps ---- */
+  .step {
+    display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem;
+    align-items: baseline; padding-top: 1.9rem; border-top: 1px solid var(--line-soft);
+  }
+  .step .idx {
+    font-size: .76rem; font-weight: 600; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .step .body { display: flex; flex-direction: column; gap: .95rem; min-width: 0; }
+  @media (max-width: 34rem) { .step { grid-template-columns: 1fr; gap: .3rem; } }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .42rem .65rem; border-bottom: 1px solid var(--line-soft); }
+  th {
+    font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td.mono, th.mono { font-family: "DM Mono", ui-monospace, Menlo, monospace; font-size: .77rem; }
+  td.k { color: var(--structure); white-space: nowrap; }
+
+  .prose { display: flex; flex-direction: column; gap: 1rem; }
+  ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .5rem; }
+  li::marker { color: var(--accent); }
+
+  .note {
+    border-left: 2px solid var(--structure); padding: .05rem 0 .05rem 1rem;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .note h3 { color: var(--structure); font-size: 1.05rem; }
+
+  footer {
+    border-top: 1px solid var(--line-soft); padding-top: 1.3rem;
+    font-size: .83rem; color: var(--muted);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">ASIS CTF Quals 2026 &middot; Crypto</span>
+    <h1>Mario</h1>
+    <p class="lede">A sound UOV public key, undone by the sixty-four hints shipped
+      beside it.</p>
+    <div class="meta">
+      <span class="chip">UOV over GF(16)</span>
+      <span class="chip">96 variables</span>
+      <span class="chip">no Gr&ouml;bner basis</span>
+      <span class="chip">1.2 second solve</span>
+      <span class="chip mark">solved</span>
+    </div>
+    <div class="flagbox">
+      <span class="cap">Flag</span>
+      <pre>ASIS{MARY0___grOe8n3r___8aSi5_chA1L3n9e_Mas7eR3d_r3A1Ly?!!!}</pre>
+    </div>
+  </header>
+
+  <section class="prose">
+    <h2>The leak in one picture</h2>
+    <p>The AES key comes from a secret 24-dimensional subspace <code>O</code> hidden inside
+      GF(16)<sup>96</sup>. Finding it from the public key is the intended hard problem.
+      The generator also publishes 64 "reports" &mdash; and every one of them is a point of
+      <code>O</code> pushed along <em>the same</em> direction <code>g</code>:</p>
+
+    <figure>
+      <svg viewBox="0 0 720 312" role="img"
+           aria-label="Diagram: the 64 reports are points of the 24-dimensional oil space O, each displaced along one shared direction g, so they all lie in a 25-dimensional space W.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+                  markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="dg-head"></path>
+          </marker>
+        </defs>
+
+        <!-- ambient space -->
+        <rect x="8" y="8" width="704" height="266" rx="4" class="dg-faint"
+              stroke-dasharray="5 4"></rect>
+        <text x="22" y="30" class="dg-s">GF(16)&#8313;&#8310; &mdash; ambient space, 96 dimensions</text>
+
+        <!-- W: the span of the reports -->
+        <rect x="48" y="52" width="624" height="200" rx="3" class="dg-face"></rect>
+        <rect x="48" y="52" width="624" height="200" rx="3" class="dg-line"></rect>
+        <text x="62" y="74" class="dg-t">W = span(r&#8321; &hellip; r&#8326;&#8324;) &mdash; 25 dimensions</text>
+
+        <!-- O: the secret hyperplane of W, seen edge-on -->
+        <line x1="72" y1="228" x2="648" y2="228" class="dg-line" stroke-width="2.5"></line>
+        <text x="72" y="248" class="dg-t">O &mdash; the secret oil space, 24 dimensions</text>
+
+        <!-- reports: a point of O displaced along the shared g -->
+        <g class="dg-accent" stroke-width="2" marker-end="url(#ah)">
+          <line x1="120" y1="228" x2="120" y2="152"></line>
+          <line x1="216" y1="228" x2="216" y2="112"></line>
+          <line x1="312" y1="228" x2="312" y2="176"></line>
+          <line x1="408" y1="228" x2="408" y2="96"></line>
+          <line x1="504" y1="228" x2="504" y2="136"></line>
+          <line x1="600" y1="228" x2="600" y2="168"></line>
+        </g>
+        <g class="dg-o">
+          <circle cx="120" cy="228" r="3.5"></circle>
+          <circle cx="216" cy="228" r="3.5"></circle>
+          <circle cx="312" cy="228" r="3.5"></circle>
+          <circle cx="408" cy="228" r="3.5"></circle>
+          <circle cx="504" cy="228" r="3.5"></circle>
+          <circle cx="600" cy="228" r="3.5"></circle>
+        </g>
+        <g class="dg-dot">
+          <circle cx="120" cy="152" r="4"></circle>
+          <circle cx="216" cy="112" r="4"></circle>
+          <circle cx="312" cy="176" r="4"></circle>
+          <circle cx="408" cy="96" r="4"></circle>
+          <circle cx="504" cy="136" r="4"></circle>
+          <circle cx="600" cy="168" r="4"></circle>
+        </g>
+        <g class="dg-a">
+          <text x="130" y="146">r&#8321;</text>
+          <text x="226" y="106">r&#8322;</text>
+          <text x="322" y="170">r&#8323;</text>
+          <text x="418" y="90">r&#8324;</text>
+          <text x="514" y="130">r&#8325;</text>
+          <text x="610" y="162">r&#8326;</text>
+        </g>
+        <text x="120" y="200" class="dg-a" text-anchor="end" dx="-8">&#955;&#7522; &middot; g</text>
+
+        <!-- the claim -->
+        <text x="360" y="296" class="dg-t" text-anchor="middle">
+          every displacement is parallel &mdash; one g, only rescaled
+        </text>
+      </svg>
+      <figcaption>Each report leaves the oil space along the same direction, so no
+        combination of them ever escapes <code>O &oplus; &lang;g&rang;</code>. Twenty-five
+        reports are enough to pin that space down; the generator publishes 64.</figcaption>
+    </figure>
+
+    <p>So the search collapses from <em>find a 24-dimensional subspace of a 96-dimensional
+      space</em> to <em>find a hyperplane of a 25-dimensional space</em>, and that is linear
+      algebra.</p>
+  </section>
+
+  <section class="step">
+    <span class="idx">01</span>
+    <div class="body">
+      <h2>What the generator builds</h2>
+      <p>Everything is over GF(16) with modulus <code>x&#8308;+x+1</code>, at
+        <code>n=96</code> variables, <code>m=72</code> equations, oil dimension
+        <code>d=24</code>.</p>
+      <p><code>oil_embed</code> maps <code>x</code> to <code>(K&middot;x, x)</code> for a
+        secret 72&times;24 matrix <code>K</code>, so the oil space is
+        <code>O = {(K&middot;x, x)}</code>. <code>build_public_map</code> then fills each
+        form with random coefficients and patches the oil-oil block so the form vanishes on
+        <code>O</code>. The patch is a characteristic-2 trick worth spelling out:</p>
+      <div class="code">
+<pre>poly[v+i][v+i] = eval_quad(poly, basis[i])</pre>
+      </div>
+      <p>Because <code>basis[i][v+i] = 1</code>, adding coefficient <code>c</code> there
+        shifts <code>P(basis[i])</code> by exactly <code>c</code>. Choosing
+        <code>c = P(basis[i])</code> gives <code>P + P = 0</code> in characteristic 2. The
+        cross terms kill each <code>P(basis&#7522; + basis&#11388;)</code> the same way,
+        which forces the polar form <code>B(basis&#7522;, basis&#11388;) = 0</code>. Zero on
+        every basis vector <em>and</em> every pairwise sum means zero on the whole span.</p>
+      <div class="note">
+        <h3>The scramble is only a change of coordinates</h3>
+        <p><code>monomial_scramble</code> permutes and rescales the variables, and
+          <code>transform_poly</code> applies the matching substitution so that
+          <code>P'(T(x)) = P(x)</code>. The published forms vanish on <code>T(O)</code>
+          exactly as the originals vanished on <code>O</code>. The attack runs in public
+          coordinates and never undoes it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">02</span>
+    <div class="body">
+      <h2>What is published</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">Field</th><th>Contents</th></tr></thead>
+          <tbody>
+            <tr><td class="mono k">F</td><td>the field: 16 elements, <code>x&#8308;+x+1</code></td></tr>
+            <tr><td class="mono k">p</td><td><code>[96, 72, 24, 64]</code></td></tr>
+            <tr><td class="mono k">A</td><td>72 quadratic forms, packed upper-triangular, 4656 hex digits each</td></tr>
+            <tr><td class="mono k">B</td><td>64 reports, each a vector in GF(16)&#8313;&#8310;</td></tr>
+            <tr><td class="mono k">C</td><td>salt, nonce, ciphertext + tag &mdash; a 60-byte flag</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The key itself is HKDF over <code>row_reduce(oil_basis)</code>. That is a full
+        Gauss-Jordan reduction, so its output is the <strong>canonical RREF</strong> of the
+        subspace &mdash; any basis of <code>T(O)</code> reproduces the same bytes. We need
+        the subspace, not the generator's particular basis.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">03</span>
+    <div class="body">
+      <h2>The leak</h2>
+      <div class="code">
+<pre><span class="st">while</span> True:
+    g = r(n)
+    <span class="st">if</span> any(eval_quad(poly, g) <span class="st">for</span> poly <span class="st">in</span> polys):
+        <span class="st">break</span>                      <span class="cmt"># one g, drawn once</span>
+
+<span class="st">for</span> _ <span class="st">in</span> range(s):
+    oil_vec = oil_embed(k_mat, r(d))
+    mask = secrets.randbelow(15) + 1
+    reports.append(vec_add(oil_vec, <span class="hl">vec_scale(g, mask)</span>))</pre>
+      </div>
+      <p>Each report is <code>r&#7522; = o&#7522; + &lambda;&#7522;&middot;g</code>. The
+        masks vary, but they only rescale the same vector, drawn once outside the loop. And
+        <code>g &notin; O</code>, because it was chosen so that some form is nonzero at it
+        while every form vanishes on <code>O</code>. So:</p>
+      <div class="code">
+<pre>W = O &#8853; &lang;g&rang;          dim W = 24 + 1 = 25
+
+[+] span(reports) has dim 25  (expected 24 + 1)</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">04</span>
+    <div class="body">
+      <h2>Inside W, the forms factor</h2>
+      <p><code>O</code> is a hyperplane of <code>W</code>, so <code>O = ker(l)</code> for a
+        linear form <code>l</code> that is unique up to scalar. Choose coordinates on
+        <code>W</code> in which <code>l</code> is the last coordinate, so
+        <code>O = {c&#8322;&#8325; = 0}</code>. A quadratic form restricted to <code>W</code>
+        vanishes on <code>O</code>, so every monomial not involving
+        <code>c&#8322;&#8325;</code> must have zero coefficient:</p>
+      <div class="code">
+<pre>Q(c) = c&#8322;&#8325; &middot; ( &Sigma; q&#7522;,&#8322;&#8325; c&#7522; + q&#8322;&#8325;,&#8322;&#8325; c&#8322;&#8325; ) = <span class="hl">l(c) &middot; L(c)</span></pre>
+      </div>
+      <p>Every one of the 72 forms, restricted to <code>W</code>, is a product of two linear
+        forms &mdash; and they all share the factor <code>l</code>.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">05</span>
+    <div class="body">
+      <h2>The polar form gives it away</h2>
+      <div class="code">
+<pre>B(u,v) = Q(u+v) + Q(u) + Q(v) = l(u)L(v) + l(v)L(u)
+
+matrix:  l&middot;L&#7488; + L&middot;l&#7488;      <span class="cmt"># symmetric, zero diagonal, rank exactly 2</span>
+kernel:  ker(l) &cap; ker(L)  &sube;  ker(l) = O    <span class="cmt"># 23 of the 24 dimensions</span></pre>
+      </div>
+      <p>Each restricted polar form hands over a 23-dimensional slice of the
+        24-dimensional secret. Two different forms give two different slices, and inside a
+        24-dimensional space two distinct 23-dimensional subspaces already span it:</p>
+      <div class="code">
+<pre>[+] poly 0: polar rank 2, kernel dim 23, oil span now 23
+[+] poly 1: polar rank 2, kernel dim 23, <span class="hl">oil span now 24</span></pre>
+      </div>
+      <p>Computationally that is one matrix triple product per form: with <code>W</code> as a
+        25&times;96 matrix and <code>S</code> the symmetrised coefficient matrix, the
+        restricted polar form is <code>W&middot;S&middot;W&#7488;</code>. In characteristic 2
+        the diagonal coefficients drop out of <code>S</code> entirely.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">06</span>
+    <div class="body">
+      <h2>Verification and decryption</h2>
+      <p>Lift the recovered coordinates back through the basis of <code>W</code> and
+        evaluate every public form on every basis vector &mdash; 1728 evaluations, all
+        zero. Then run the generator's own KDF over the canonical RREF.</p>
+      <p>No crypto library is installed in this environment &mdash; <code>Crypto</code>,
+        <code>Cryptodome</code> and <code>cryptography</code> are all absent &mdash; so the
+        solver implements AES-256-GCM and HKDF-SHA256 from the standard library, checked
+        against the FIPS-197 known-answer test and two NIST GCM vectors before use.</p>
+      <div class="code">
+<pre>[+] AES-256-GCM / HKDF self-test passed (FIPS-197 + NIST vectors)
+[+] verified: 72 polys x 24 basis vectors, <span class="hl">0 nonzero</span>
+[+] key: c22b0c9d68704da8a95c8cc4753ad5c85f579e8958d5215ce1d45802d4a9449b
+[+] <span class="hl">GCM tag valid: True</span>
+[+] flag: ASIS{MARY0___grOe8n3r___8aSi5_chA1L3n9e_Mas7eR3d_r3A1Ly?!!!}</pre>
+      </div>
+      <p>The tag validating is the proof: it confirms the recovered subspace is exactly the
+        generator's, not merely one that happens to satisfy the equations.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">07</span>
+    <div class="body">
+      <h2>What would have fixed it</h2>
+      <p>One line out of place. <code>g</code> is drawn <em>before</em> the report loop and
+        reused; draw it inside instead and each report becomes
+        <code>o&#7522; + &lambda;&#7522;&middot;g&#7522;</code> with an independent
+        direction. Those vectors span the whole of GF(16)&#8313;&#8310; within a hundred samples
+        and reveal nothing &mdash; there is no common 25-dimensional envelope left to
+        intersect.</p>
+      <ul>
+        <li><strong>The scramble contributes nothing.</strong> It is a change of
+          coordinates, and the attack is coordinate-free: it only asks which subspace the
+          reports span and where the forms vanish. Obfuscation that commutes with the attack
+          is not a defence.</li>
+        <li><strong>The masks are a decoy.</strong> Random nonzero
+          <code>&lambda;&#7522;</code> look like they randomise each report, but scaling a
+          fixed vector stays inside <code>&lang;g&rang;</code>. Randomness that does not
+          raise the dimension of what you publish hides nothing.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">&mdash;</span>
+    <div class="body">
+      <h2>Takeaways</h2>
+      <ul>
+        <li><strong>Count dimensions before doing algebra.</strong> The published data was
+          64 vectors in a 96-dimensional space. The only question worth asking first was how
+          many dimensions they actually span; the answer, 25, made the rest routine.</li>
+        <li><strong>A quadratic form vanishing on a hyperplane factors.</strong>
+          <code>Q = l&middot;L</code> is a small fact with a large consequence &mdash; the
+          polar form drops to rank 2 and its kernel is a near-complete slice of the secret.
+          Whenever a form is known to vanish on a codimension-1 subspace, take the polar
+          form.</li>
+        <li><strong>Auxiliary data is part of the attack surface.</strong> The public key
+          was sound. The extra reports were what leaked, and a scheme is only as strong as
+          everything shipped alongside it.</li>
+        <li><strong>Verify with the AEAD tag.</strong> Recovering the right subspace produces
+          a valid GCM tag, which is a proof rather than a plausibility argument.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Crypto &middot; Mario</span>
+    <span>Solver and challenge material: <code>Crypto/Mario/</code></span>
+  </footer>
+
+</div>
