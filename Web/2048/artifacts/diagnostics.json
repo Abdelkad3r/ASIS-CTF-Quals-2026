@@ -1,0 +1,57 @@
+{
+  "node": "C-137 garage division",
+  "server": "Apache Tomcat/9.0.116",
+  "os": "Linux/amd64",
+  "runningAs": "citadel",
+  "classpathJars": [
+    "annotations-api.jar",
+    "catalina-ant.jar",
+    "catalina-ha.jar",
+    "catalina-ssi.jar",
+    "catalina-storeconfig.jar",
+    "catalina-tribes.jar",
+    "catalina.jar",
+    "commons-collections-3.2.1.jar",
+    "ecj-4.20.jar",
+    "el-api.jar",
+    "jasper-el.jar",
+    "jasper.jar",
+    "jaspic-api.jar",
+    "jsp-api.jar",
+    "servlet-api.jar",
+    "tomcat-api.jar",
+    "tomcat-coyote-ffm.jar",
+    "tomcat-coyote.jar",
+    "tomcat-dbcp.jar",
+    "tomcat-i18n-cs.jar",
+    "tomcat-i18n-de.jar",
+    "tomcat-i18n-es.jar",
+    "tomcat-i18n-fr.jar",
+    "tomcat-i18n-ja.jar",
+    "tomcat-i18n-ko.jar",
+    "tomcat-i18n-pt-BR.jar",
+    "tomcat-i18n-ru.jar",
+    "tomcat-i18n-zh-CN.jar",
+    "tomcat-jdbc.jar",
+    "tomcat-jni.jar",
+    "tomcat-util-scan.jar",
+    "tomcat-util.jar",
+    "tomcat-websocket.jar",
+    "websocket-api.jar"
+  ],
+  "listeners": {
+    "intranet": "http 0.0.0.0:8080",
+    "garageGateway": "tribes receiver tcp *:4000",
+    "gatewayCipher": "AES/CBC/PKCS5Padding"
+  },
+  "multiverseSync": {
+    "membership": "multicast 228.13.37.7:45564",
+    "note": "handshake integrity questionable since the Jerry incident"
+  },
+  "citadelLayout": {
+    "vault": "/opt/citadel/vault (root-owned, randomised labels)",
+    "gate": "/opt/citadel/gate (root-owned, randomised labels)",
+    "shelf": "/opt/citadel/shared (world-writable, 15min TTL)",
+    "shelfMirror": "/mirror.jsp"
+  }
+}
