@@ -1,0 +1,614 @@
+<title>Breaking Hackel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg:        #F5F5F2;
+    --surface:   #FFFFFF;
+    --surface-2: #ECECE7;
+    --ink:       #17181D;
+    --ink-soft:  #3A3D48;
+    --muted:     #676B7A;
+    --accent:    #2F45C5;
+    --accent-bg: #E7E9FA;
+    --danger:    #A62620;
+    --danger-bg: #F8E6E4;
+    --ok:        #1C6647;
+    --ok-bg:     #E2F0E9;
+    --rule:      #DCDCD6;
+    --rule-soft: #E9E9E4;
+    --shadow:    0 1px 2px rgba(23,24,29,.05), 0 8px 24px -16px rgba(23,24,29,.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0F1015;
+      --surface:   #171921;
+      --surface-2: #1E212B;
+      --ink:       #E9E9EF;
+      --ink-soft:  #C3C6D2;
+      --muted:     #9599A8;
+      --accent:    #97A4FF;
+      --accent-bg: #1D2140;
+      --danger:    #FF7C70;
+      --danger-bg: #37201E;
+      --ok:        #5FCB95;
+      --ok-bg:     #162C23;
+      --rule:      #282C38;
+      --rule-soft: #202430;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0F1015;
+    --surface:   #171921;
+    --surface-2: #1E212B;
+    --ink:       #E9E9EF;
+    --ink-soft:  #C3C6D2;
+    --muted:     #9599A8;
+    --accent:    #97A4FF;
+    --accent-bg: #1D2140;
+    --danger:    #FF7C70;
+    --danger-bg: #37201E;
+    --ok:        #5FCB95;
+    --ok-bg:     #162C23;
+    --rule:      #282C38;
+    --rule-soft: #202430;
+    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  .wrap { max-width: 800px; margin-inline: auto; padding: 0 24px 96px; }
+
+  /* ---------- masthead ---------- */
+  .masthead { padding: 72px 0 40px; border-bottom: 1px solid var(--rule); }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: 11.5px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .eyebrow .dot { color: var(--rule); }
+  h1 {
+    font-size: clamp(46px, 9vw, 76px); font-weight: 300; letter-spacing: -.025em;
+    line-height: 1; margin: 20px 0 0; text-wrap: balance;
+  }
+  h1 .accent { font-style: italic; color: var(--accent); }
+  .thesis {
+    font-size: 20px; color: var(--ink-soft); max-width: 60ch;
+    margin: 22px 0 0; text-wrap: pretty;
+  }
+
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1px;
+          background: var(--rule-soft); border: 1px solid var(--rule-soft);
+          border-radius: 6px; overflow: hidden; margin-top: 34px; }
+  .meta div { background: var(--surface); padding: 12px 15px; }
+  .meta dt {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--muted); margin: 0 0 3px;
+  }
+  .meta dd { margin: 0; font-size: 15px; font-weight: 600; }
+
+  .flagbar {
+    margin-top: 14px; padding: 14px 16px; border-radius: 6px;
+    background: var(--ok-bg); border: 1px solid color-mix(in srgb, var(--ok) 30%, transparent);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .flagbar .lbl {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--ok); font-weight: 600;
+  }
+  .flagbar code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 14px;
+    color: var(--ink); word-break: break-all; background: none; padding: 0; border: 0;
+  }
+
+  /* ---------- decoder hero ---------- */
+  .decoder {
+    margin: 40px 0 0; padding: 24px; background: var(--surface);
+    border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow);
+  }
+  .decoder-cap {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px;
+  }
+  .strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .cell { flex: 1 1 0; min-width: 74px; text-align: center; }
+  .word {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px;
+    padding: 9px 4px; border-radius: 5px; background: var(--surface-2);
+    color: var(--muted); letter-spacing: .02em; word-break: break-all;
+  }
+  .word .mark { color: var(--danger); font-weight: 600; }
+  .cell.one .word { background: var(--danger-bg); color: var(--ink-soft); }
+  .bit {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 19px; font-weight: 600;
+    margin-top: 9px; color: var(--muted);
+  }
+  .cell.one .bit { color: var(--danger); }
+  .decoder-out {
+    margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--rule);
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--muted);
+  }
+  .decoder-out .glyph { font-size: 30px; font-weight: 600; color: var(--accent); line-height: 1; }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 60px; scroll-margin-top: 24px; }
+  h2 {
+    font-size: 27px; font-weight: 600; letter-spacing: -.015em; line-height: 1.25;
+    margin: 0 0 6px; text-wrap: balance;
+  }
+  h2 .num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; font-weight: 500;
+    color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .1em;
+  }
+  h3 {
+    font-size: 18px; font-weight: 600; margin: 34px 0 8px; letter-spacing: -.005em;
+    color: var(--ink);
+  }
+  p { margin: 14px 0; max-width: 68ch; }
+  ul, ol { max-width: 68ch; padding-left: 22px; }
+  li { margin: 8px 0; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  strong { font-weight: 600; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .86em; background: var(--surface-2); padding: .12em .38em;
+    border-radius: 3px; word-break: break-word;
+  }
+  pre {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 7px;
+    padding: 16px 18px; overflow-x: auto; margin: 18px 0; box-shadow: var(--shadow);
+  }
+  pre code {
+    background: none; padding: 0; border-radius: 0; font-size: 13px;
+    line-height: 1.6; color: var(--ink-soft); white-space: pre;
+  }
+  pre.term { background: var(--surface-2); border-color: var(--rule); }
+  pre.term code { color: var(--ink-soft); }
+  .c-dim { color: var(--muted); }
+  .c-ok  { color: var(--ok); font-weight: 500; }
+  .c-bad { color: var(--danger); }
+  .c-key { color: var(--accent); }
+
+  .callout {
+    margin: 22px 0; padding: 16px 18px; border-radius: 7px;
+    background: var(--accent-bg); border-left: 3px solid var(--accent);
+  }
+  .callout p { margin: 0; max-width: none; }
+  .callout .tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: 6px;
+  }
+
+  .tablewrap { overflow-x: auto; margin: 20px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 14px 9px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: .11em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  td code { font-size: 13px; white-space: nowrap; }
+  .taut { color: var(--ok); font-weight: 600; font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .num-col { font-variant-numeric: tabular-nums; text-align: right; padding-right: 0; }
+
+  .claim { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--rule-soft);
+           border: 1px solid var(--rule-soft); border-radius: 7px; overflow: hidden; margin: 26px 0; }
+  @media (min-width: 620px) { .claim { grid-template-columns: 1fr 1fr; } }
+  .claim > div { background: var(--surface); padding: 18px 20px; }
+  .claim .tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: .13em; text-transform: uppercase; margin-bottom: 8px; display: block;
+  }
+  .claim .marketing .tag { color: var(--muted); }
+  .claim .reality .tag { color: var(--danger); }
+  .claim p { margin: 0; font-size: 15.5px; max-width: none; }
+  .claim .big {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 21px; font-weight: 600;
+    font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin-bottom: 6px; display: block;
+  }
+  .claim .marketing .big { color: var(--ink-soft); }
+  .claim .reality .big { color: var(--danger); }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule);
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px;
+    color: var(--muted); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cell { animation: rise .5s cubic-bezier(.2,.7,.3,1) backwards; }
+    @keyframes rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>ASIS CTF Quals 2026</span><span class="dot">/</span>
+      <span>Crypto</span><span class="dot">/</span>
+      <span>Baby</span>
+    </div>
+    <h1>Hackel<span class="accent">.</span></h1>
+    <p class="thesis">
+      A &ldquo;post-quantum vault&rdquo; guarded by group presentations, advertising 1.6 quadrillion
+      states. The permutations are never applied to the ciphertext, and the key check never looks at
+      the key. Three independent breaks, none of them a search.
+    </p>
+
+    <dl class="meta">
+      <div><dt>Service</dt><dd>nc 65.109.208.91 3771</dd></div>
+      <div><dt>Degree</dt><dd>n = 11</dd></div>
+      <div><dt>Claimed keyspace</dt><dd>(11!)&sup2; &asymp; 1.59 &times; 10<sup>15</sup></dd></div>
+      <div><dt>Searched</dt><dd>0</dd></div>
+    </dl>
+
+    <div class="flagbar">
+      <span class="lbl">Flag</span>
+      <code>ASIS{sEm1d!r3c7_gr0uP_pr3S3nt4T10n____k3y___r3C0verY_4TtacK!!}</code>
+    </div>
+
+    <div class="decoder">
+      <p class="decoder-cap">Live capture &mdash; the first eight &ldquo;encrypted&rdquo; words, decoded by eye</p>
+      <div class="strip">
+        <div class="cell"     style="animation-delay:.00s"><div class="word">aaa</div><div class="bit">0</div></div>
+        <div class="cell one" style="animation-delay:.05s"><div class="word">a<span class="mark">b</span></div><div class="bit">1</div></div>
+        <div class="cell"     style="animation-delay:.10s"><div class="word">aaaaa</div><div class="bit">0</div></div>
+        <div class="cell"     style="animation-delay:.15s"><div class="word">aaa</div><div class="bit">0</div></div>
+        <div class="cell"     style="animation-delay:.20s"><div class="word">aaaaaaaa</div><div class="bit">0</div></div>
+        <div class="cell"     style="animation-delay:.25s"><div class="word">a</div><div class="bit">0</div></div>
+        <div class="cell"     style="animation-delay:.30s"><div class="word">aaa</div><div class="bit">0</div></div>
+        <div class="cell one" style="animation-delay:.35s"><div class="word">aaaaaa<span class="mark">b</span></div><div class="bit">1</div></div>
+      </div>
+      <div class="decoder-out">
+        <span>01000001</span><span class="c-dim">&rarr;</span><span>0x41</span><span class="c-dim">&rarr;</span>
+        <span class="glyph">A</span>
+        <span class="c-dim">the first byte of the flag &mdash; no key required</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="tldr">
+    <h2><span class="num">TL;DR</span>What actually breaks</h2>
+    <p>
+      The service wraps a trivial encoding in the vocabulary of combinatorial group theory. Two
+      independent failures exist, and neither touches the advertised keyspace.
+    </p>
+    <ol>
+      <li><strong>The ciphertext is plaintext.</strong> Flag bits are encoded as <em>words over the
+        generator alphabet</em> and printed literally by menu option <code>[2]</code>. A bit is
+        <code>1</code> exactly when its word contains the letter <code>b</code>.</li>
+      <li><strong>The key check never involves the key.</strong> Option <code>[4]</code> validates a
+        submission against the <em>published</em> presentation only. That presentation collapses to
+        <code>A¹⁰ = B¹¹ = 1</code>, so a 10-cycle and an 11-cycle are accepted as an equivalent key.</li>
+    </ol>
+
+    <div class="claim">
+      <div class="marketing">
+        <span class="tag">The claim</span>
+        <span class="big">1,593,350,922,240,000</span>
+        <p>Two independent permutation assignments on 11 points: <code>(11!)&sup2;</code>. Beyond
+          brute force, and never once relevant.</p>
+      </div>
+      <div class="reality">
+        <span class="tag">The break</span>
+        <span class="big">"b" in word</span>
+        <p>One membership test per bit. The whole 62-byte flag decodes from a single menu
+          read, offline.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="recon">
+    <h2><span class="num">01</span>Reconnaissance</h2>
+    <p>
+      The archive holds a single file, <code>hackel.py</code> &mdash; the complete server, minus the
+      <code>flag</code> module it imports. Five menu actions are exposed, and two of them
+      (<code>[4]</code> and <code>[5]</code>) print the flag.
+    </p>
+    <pre class="term"><code>[1] View Public Parameters &amp; Relations
+[2] View Training Samples &amp; Encrypted Flag Words
+[3] Homomorphic Word Concatenation Oracle
+[4] Submit Recovered Equivalent Key (Unlock Flag)
+[5] Interactive Speed Challenge (Unlock Flag)</code></pre>
+    <p>
+      Option <code>[3]</code> is a red herring. Despite the name, it evaluates nothing &mdash; it reads
+      two words and returns their string concatenation:
+    </p>
+    <pre><code>def oracle(self) -&gt; None:
+    w1 = parse_seq(self.get_line())
+    w2 = parse_seq(self.get_line())
+    self.out(f"[+] Homomorphic Product Word: {''.join(w1 + w2) or '1'}")</code></pre>
+
+    <h3>Conventions</h3>
+    <p>
+      Permutations are 0-indexed tuples on <code>n = 11</code> points, and they compose
+      <strong>left to right</strong>:
+    </p>
+    <pre><code>def compose(a, b):
+    return tuple(b[i] for i in a)      <span class="c-dim"># result[i] = b[a[i]]  ->  "apply a, then b"</span></code></pre>
+    <p>
+      So the word <code>AB</code> means <em>A then B</em>, matching <code>eval_seq</code>, which folds
+      <code>compose</code> over the token list. <code>conj(x, c)</code> is <code>c⁻¹xc</code>.
+    </p>
+  </section>
+
+  <section id="build">
+    <h2><span class="num">02</span>How the vault is built</h2>
+    <p>
+      <code>init_state</code> builds two structurally identical alphabets &mdash; uppercase
+      <code>A..E</code> and lowercase <code>a..e</code> &mdash; each from its own random conjugator:
+    </p>
+    <pre><code>l_rand = tuple(rng.sample(range(n), n))
+a_l = conj(cyc_perm(n, [tuple(range(10))]), l_rand)                 <span class="c-dim"># 10-cycle, conjugated</span>
+b_l = conj(cyc_perm(n, [tuple(rng.sample(range(n), n))]), l_rand)   <span class="c-dim"># 11-cycle, conjugated</span>
+c_l = compose(a_l, b_l)                                            <span class="c-dim"># c = ab</span>
+d_l = compose(invert(a_l), compose(b_l, c_l))                      <span class="c-dim"># d = a^-1 b c</span>
+e_l = compose(c_l, d_l)                                            <span class="c-dim"># e = cd</span></code></pre>
+    <p>
+      So <code>a</code> has order 10 and <code>b</code> has order 11, while <code>c</code>,
+      <code>d</code>, <code>e</code> are <em>derived</em> rather than independent &mdash; a fact that
+      dismantles most of the presentation later.
+    </p>
+
+    <h3>The bit encoding</h3>
+    <p>This is the entire cryptosystem:</p>
+    <pre><code>flag_bits = "".join(f"{b:08b}" for b in flag_str.encode("utf-8"))
+flag_words = [
+    (t0,) * rng.randint(1, 9) if bit == "0" else (t0,) * rng.randint(0, 9) + (t1,)
+    for bit in flag_bits
+]</code></pre>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Plaintext bit</th><th>Ciphertext word</th><th>Exponent range</th></tr></thead>
+        <tbody>
+          <tr><td><code>0</code></td><td><code>a^k</code></td><td><code>k &isin; 1..9</code></td></tr>
+          <tr><td><code>1</code></td><td><code>a^k b</code></td><td><code>k &isin; 0..9</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      The intended hardness story is that <code>a^k</code> and <code>a^k b</code> are
+      indistinguishable without the key. The <code>a</code>-padding is the only randomness in the
+      scheme, and it is pure noise.
+    </p>
+  </section>
+
+  <section id="break1">
+    <h2><span class="num">03</span>Break #1 &mdash; the ciphertext is never encrypted</h2>
+    <p>
+      <code>show_samples</code> prints the words <strong>as strings</strong>, not as evaluated
+      permutations:
+    </p>
+    <pre><code>self.out("    " + ", ".join("".join(w) or "1" for w in self.state.ciphertexts))</code></pre>
+    <pre class="term"><code><span class="c-ok">[+] Encrypted Flag Words (496):</span>
+    aaa, a<span class="c-bad">b</span>, aaaaa, aaa, aaaaaaaa, a, aaa, aaaaaa<span class="c-bad">b</span>, ...</code></pre>
+    <div class="callout">
+      <span class="tag">The whole break</span>
+      <p>bit = 1 &nbsp;&hArr;&nbsp; the word contains <code>b</code></p>
+    </div>
+    <p>
+      The classifier is exact, with no edge cases. A <code>0</code> word is <code>a^k</code> with
+      <code>k &ge; 1</code>, so it is never empty and never contains <code>b</code>; a <code>1</code>
+      word always ends in <code>b</code>. The identity token <code>1</code> never appears. 496 words
+      = 496 bits = 62 bytes, exactly the flag length.
+    </p>
+    <pre><code>bits = "".join("1" if "b" in w else "0" for w in words)
+flag = bytes(int(bits[i:i+8], 2) for i in range(0, len(bits), 8)).decode()</code></pre>
+
+    <h3>The same break, one level deeper</h3>
+    <p>
+      Even had the server evaluated the words into permutations before sending them, the scheme would
+      still fall. The bit is determined by the <strong>coset of <code>&lt;a&gt;</code></strong>:
+    </p>
+    <ul>
+      <li><code>a^k &isin; &lt;a&gt;</code> &rarr; bit <code>0</code></li>
+      <li><code>a^k&middot;b &notin; &lt;a&gt;</code> &rarr; bit <code>1</code>, because
+        <code>|b| = 11</code> does not divide <code>|&lt;a&gt;| = 10</code></li>
+    </ul>
+    <p>
+      That test is preserved by <em>any</em> assignment satisfying the published relations, so it does
+      not need the real key &mdash; only an equivalent one. The server performs precisely this test
+      itself:
+    </p>
+    <pre><code>z_span = span_group(z_perms, limit=1000)      <span class="c-dim"># = &lt;a&gt;, order 10</span>
+if not o_perms or o_perms[0] in z_span:       <span class="c-dim"># a^k b must fall outside</span>
+    self.out("[-] Key consistency verification failed.")</code></pre>
+    <p>
+      The &ldquo;semidirect product&rdquo; framing adds no security: the secret conjugator is a change
+      of basis, and coset membership is basis-independent.
+    </p>
+  </section>
+
+  <section id="break2">
+    <h2><span class="num">04</span>Break #2 &mdash; recovering an equivalent key</h2>
+    <p>
+      Option <code>[4]</code> is the intended path. Critically,
+      <strong><code>submit_key</code> never references the server&rsquo;s secret permutations.</strong>
+      It applies four gates only: every symbol is a valid permutation of <code>range(11)</code>;
+      <code>is_symmetric_gen</code> holds for both generator sets; all upper, lower and mixed
+      relations hold; and the first one-sample lies outside the span of the zero-samples.
+    </p>
+
+    <h3>4.1 &nbsp;Collapsing the presentation</h3>
+    <p>The published upper relations look formidable:</p>
+    <pre class="term"><code>AAAAAAAAAA = 1      AB = C        CD = E        AC = AAB      CB = ABB
+BBBBBBBBBBB = 1     AD = BC       ABD = E       DE = DCD      ED = CDD</code></pre>
+    <p>
+      Substituting the definitions <code>C = AB</code>, <code>D = A⁻¹BC = A⁻¹BAB</code>,
+      <code>E = CD</code> turns eight of the ten into tautologies:
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Relation</th><th>Check</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code>AB = C</code></td><td>definition</td><td class="taut">trivial</td></tr>
+          <tr><td><code>AD = BC</code></td><td><code>A&middot;A⁻¹BAB = BAB</code> and <code>B&middot;AB = BAB</code></td><td class="taut">holds</td></tr>
+          <tr><td><code>CD = E</code></td><td>definition</td><td class="taut">trivial</td></tr>
+          <tr><td><code>ABD = E</code></td><td><code>AB&middot;D = C&middot;D = E</code></td><td class="taut">holds</td></tr>
+          <tr><td><code>AC = AAB</code></td><td><code>A&middot;(AB) = A&middot;A&middot;B</code></td><td class="taut">holds</td></tr>
+          <tr><td><code>DE = DCD</code></td><td><code>D&middot;(CD) = D&middot;C&middot;D</code></td><td class="taut">holds</td></tr>
+          <tr><td><code>CB = ABB</code></td><td><code>(AB)&middot;B = A&middot;B&middot;B</code></td><td class="taut">holds</td></tr>
+          <tr><td><code>ED = CDD</code></td><td><code>(CD)&middot;D = C&middot;D&middot;D</code></td><td class="taut">holds</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>What actually remains is:</p>
+    <pre><code>&lt; A, B | A^10 = 1, B^11 = 1 &gt;</code></pre>
+
+    <h3>4.2 &nbsp;Collapsing the mixed relations</h3>
+    <pre class="term"><code>Aa = aA                 Ab = ab&middot;a^9&middot;A
+Bb = bB                 Ba = ba&middot;b^10&middot;B</code></pre>
+    <p>
+      Setting <strong><code>lower := upper</code></strong> satisfies all four, using the two surviving
+      order relations:
+    </p>
+    <ul>
+      <li><code>Aa = aA</code> &rarr; <code>A&middot;A = A&middot;A</code></li>
+      <li><code>Ab = ab a⁹ A</code> &rarr; RHS <code>= A&middot;B&middot;A⁹&middot;A = A&middot;B&middot;A¹⁰ = A&middot;B</code> &nbsp;(since <code>A¹⁰ = 1</code>)</li>
+      <li><code>Bb = bB</code> &rarr; <code>B&middot;B = B&middot;B</code></li>
+      <li><code>Ba = ba b¹⁰ B</code> &rarr; RHS <code>= B&middot;A&middot;B¹⁰&middot;B = B&middot;A&middot;B¹¹ = B&middot;A</code> &nbsp;(since <code>B¹¹ = 1</code>)</li>
+    </ul>
+    <p>The semidirect structure evaporates: the diagonal embedding is a valid solution.</p>
+
+    <h3>4.3 &nbsp;Satisfying the structural gates</h3>
+    <p>
+      <code>is_symmetric_gen</code> is misleadingly named &mdash; it does <strong>not</strong> verify
+      that the group is <code>S₁₁</code>. It checks only that the generators act transitively on the
+      11 points, and that at least one is odd:
+    </p>
+    <pre><code>has_odd = any(sign_p(g) == -1 for g in gens)</code></pre>
+    <p>Both fall out of the obvious choice:</p>
+    <ul>
+      <li><strong><code>B</code> = the 11-cycle <code>(0 1 2 … 10)</code></strong> &mdash; order 11,
+        transitive on its own.</li>
+      <li><strong><code>A</code> = the 10-cycle <code>(0 1 … 9)</code></strong> fixing point 10 &mdash;
+        order 10, and odd, since a <code>k</code>-cycle has sign <code>(-1)^(k-1)</code> and
+        <code>(-1)⁹ = -1</code>.</li>
+    </ul>
+    <p>
+      Then <code>C = AB</code>, <code>D = A⁻¹BC</code>, <code>E = CD</code>, and the lowercase set is a
+      copy. The final gate is free: <code>a^k&middot;b &isin; &lt;a&gt;</code> would force
+      <code>b &isin; &lt;a&gt;</code>, impossible since <code>11 &nmid; 10</code>.
+    </p>
+
+    <h3>4.4 &nbsp;The solution is not unique</h3>
+    <p>
+      Because the gates test only the published presentation, many inequivalent groups pass. The
+      choice above happens to generate the whole of <code>S₁₁</code> (order 39,916,800, confirmed by
+      Schreier&ndash;Sims), but the Frobenius group <code>AGL(1,11) = 11:10</code> of order
+      <strong>110</strong> passes every gate just as well:
+    </p>
+    <pre><code>A = tuple((i * 2) % 11 for i in range(11))   <span class="c-dim"># x -&gt; 2x,  a 10-cycle fixing 0</span>
+B = tuple((i + 1) % 11 for i in range(11))   <span class="c-dim"># x -&gt; x+1, an 11-cycle</span></code></pre>
+    <p>
+      A group 362,880&times; smaller than <code>S₁₁</code> is accepted &mdash; the clearest statement
+      of how little the verifier constrains. This is why the challenge says &ldquo;equivalent
+      key&rdquo;, not &ldquo;the key&rdquo;: the secret conjugators are never pinned down at all.
+    </p>
+
+    <h3>4.5 &nbsp;The payload</h3>
+    <pre><code>{"A":[1,2,3,4,5,6,7,8,9,0,10],"B":[1,2,3,4,5,6,7,8,9,10,0],
+ "C":[2,3,4,5,6,7,8,9,10,1,0],"D":[0,3,4,5,6,7,8,9,10,1,2],"E":[4,5,6,7,8,9,10,1,2,3,0],
+ "a":[1,2,3,4,5,6,7,8,9,0,10],"b":[1,2,3,4,5,6,7,8,9,10,0],
+ "c":[2,3,4,5,6,7,8,9,10,1,0],"d":[0,3,4,5,6,7,8,9,10,1,2],"e":[4,5,6,7,8,9,10,1,2,3,0]}</code></pre>
+    <p>
+      <code>verify_key.py</code> imports the server&rsquo;s own checkers and confirms every gate
+      offline, before touching the network:
+    </p>
+    <pre class="term"><code>$ python3 solution/verify_key.py
+  <span class="c-ok">[PASS]</span> A^10 == 1
+  <span class="c-ok">[PASS]</span> B^11 == 1
+  <span class="c-ok">[PASS]</span> upper relations
+  <span class="c-ok">[PASS]</span> lower relations
+  <span class="c-ok">[PASS]</span> mixed relations
+  <span class="c-ok">[PASS]</span> is_symmetric_gen(upper)
+  <span class="c-ok">[PASS]</span> is_symmetric_gen(lower)
+  <span class="c-ok">[PASS]</span> one-word outside &lt;a&gt;
+
+  |&lt;a&gt;| = 10 (expected 10, the order of the 10-cycle)
+
+ALL CHECKS PASS: True</code></pre>
+  </section>
+
+  <section id="break3">
+    <h2><span class="num">05</span>Break #3 &mdash; the speed challenge</h2>
+    <p>
+      Option <code>[5]</code> generates 16 fresh words with the <em>same</em> encoding and demands
+      classification within 5 seconds &mdash; a human-speed barrier, not a cryptographic one. The same
+      <code>"b" in word</code> test answers it instantly.
+    </p>
+    <pre><code>words = [l0 * rng.randint(1, 9) if b == "0" else l0 * rng.randint(0, 9) + l1 for b in bits]</code></pre>
+  </section>
+
+  <section id="exec">
+    <h2><span class="num">06</span>Execution</h2>
+    <pre class="term"><code>$ python3 solution/solve_key.py
+[*] payload (291 bytes)
+    {"A":[1,2,3,4,5,6,7,8,9,0,10],"B":[1,2,3,4,5,6,7,8,9,10,0], ... }
+<span class="c-ok">[+] KEY ACCEPTED! Verification successful.</span>
+<span class="c-ok">[+] FLAG: ASIS{sEm1d!r3c7_gr0uP_pr3S3nt4T10n____k3y___r3C0verY_4TtacK!!}</span></code></pre>
+    <pre class="term"><code>$ python3 solution/solve_leak.py
+[*] lower alphabet ['a', 'b', 'c', 'd', 'e'] -&gt; padding='a' marker='b'
+[*] 496 words -&gt; 496 bits -&gt; 62 bytes
+[*] sample: ['aaaaaaaaa', 'b', 'a', 'a', 'aaaaaaaa', 'aaaaa']
+<span class="c-ok">[+] FLAG (offline): ASIS{sEm1d!r3c7_gr0uP_pr3S3nt4T10n____k3y___r3C0verY_4TtacK!!}</span>
+[*] speed challenge -&gt; 1111010111100000
+<span class="c-ok">[+] CHALLENGE PASSED!</span>
+<span class="c-ok">[+] FLAG: ASIS{sEm1d!r3c7_gr0uP_pr3S3nt4T10n____k3y___r3C0verY_4TtacK!!}</span></code></pre>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Script</th><th>Purpose</th><th>Network</th></tr></thead>
+        <tbody>
+          <tr><td><code>solve_leak.py</code></td><td>Decodes the flag from option <code>[2]</code>; also passes option <code>[5]</code></td><td>yes</td></tr>
+          <tr><td><code>solve_key.py</code></td><td>Builds and submits the equivalent key to option <code>[4]</code></td><td>yes</td></tr>
+          <tr><td><code>verify_key.py</code></td><td>Proves the key against the server&rsquo;s own checkers</td><td>no</td></tr>
+          <tr><td><code>group_order.py</code></td><td>Schreier&ndash;Sims order computation for the submitted group</td><td>no</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="lessons">
+    <h2><span class="num">07</span>Lessons</h2>
+    <ul>
+      <li><strong>Encoding is not encryption.</strong> The words were never evaluated into the
+        permutation group; the group was decoration around a plaintext channel.</li>
+      <li><strong>Never let a verifier accept anything but the secret.</strong> <code>submit_key</code>
+        validated a <em>public</em> presentation, turning key recovery into &ldquo;solve the published
+        equations&rdquo; &mdash; which is exactly what the flag text says.</li>
+      <li><strong>Redundant relations are not extra security.</strong> Eight of the ten relations were
+        consequences of the other two, so the presentation carried a fraction of the constraint it
+        appeared to.</li>
+      <li><strong>Keyspace size is a ceiling, not a floor.</strong> <code>(11!)&sup2;</code> bounds
+        brute force and says nothing about structure. The structure cost nothing to solve.</li>
+      <li><strong>Naming can hide a weak check.</strong> <code>is_symmetric_gen</code> sounds like
+        &ldquo;generates <code>S₁₁</code>&rdquo;, but tests only transitivity plus one odd generator
+        &mdash; necessary conditions, nowhere near sufficient. <code>AGL(1,11)</code>, of order 110,
+        satisfies both.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Hackel &middot; Crypto</span>
+    <span>Solved by Abdelkad3r</span>
+  </footer>
+
+</div>
