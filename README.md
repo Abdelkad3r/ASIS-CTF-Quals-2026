@@ -8,6 +8,7 @@ Professional writeups and reproducible solution artifacts for ASIS CTF Quals
 | Challenge | Category | Writeup | Flag |
 | --- | --- | --- | --- |
 | Fence | Cryptography | [crypto/fence](crypto/fence/) | `ASIS{qu4ntum_c0h3r3nc3_1n_0v3r5tr3tch3d_h4rm0n1c_f13ld5!}` |
+| QFilter | Binary Exploitation | [pwn/qfilter](pwn/qfilter/) | `ASIS{m337_7h3_br4nd_n3w_QJS_4ll0c470r_334811b53075}` |
 | Mic Check | misc / warm-up | [misc/mic-check](misc/mic-check/) &middot; [published](https://claude.ai/code/artifact/96cdf208-78ac-4b31-a496-d065ccd7ea93) | `ASIS{f4r3w3ll_cl4ss1c_h3ll0_unc3rt41n_3r4!}` |
 
 ## Layout
@@ -24,6 +25,7 @@ instructions are documented in each writeup.
 ```console
 $ python3 misc/mic-check/solve.py
 $ python3 crypto/fence/solve.py
+$ python3 pwn/qfilter/solve.py
 ```
 
 Use these materials only in authorized CTF and educational environments.
