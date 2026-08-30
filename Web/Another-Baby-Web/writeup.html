@@ -1,0 +1,336 @@
+<title>Beneath the Web-Root</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --paper:#F6F4EF; --card:#FFFFFF; --sunk:#EFEBE2;
+    --ink:#1C1E22; --ink-soft:#3E434C; --muted:#6E7480;
+    --accent:#0E7C6B; --accent-soft:#DCEFEA;
+    --gold:#B4761A; --gold-soft:#F6ECD8;
+    --bad:#B23A2E; --bad-soft:#F7E5E1;
+    --ok:#1C6647; --ok-soft:#E1F0E8;
+    --rule:#DEDACF; --rule-soft:#EAE7DD;
+    --shadow:0 1px 2px rgba(28,30,34,.05),0 10px 30px -18px rgba(28,30,34,.28);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#101317; --card:#171B21; --sunk:#1D222A;
+    --ink:#ECEEF2; --ink-soft:#C6CBD4; --muted:#8A909C;
+    --accent:#4FD2BC; --accent-soft:#123029;
+    --gold:#E3B25E; --gold-soft:#2C2413;
+    --bad:#FF8375; --bad-soft:#361F1C;
+    --ok:#63CD97; --ok-soft:#14281F;
+    --rule:#282E38; --rule-soft:#20252E;
+    --shadow:0 1px 2px rgba(0,0,0,.45),0 12px 30px -18px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="dark"]{
+    --paper:#101317; --card:#171B21; --sunk:#1D222A;
+    --ink:#ECEEF2; --ink-soft:#C6CBD4; --muted:#8A909C;
+    --accent:#4FD2BC; --accent-soft:#123029;
+    --gold:#E3B25E; --gold-soft:#2C2413;
+    --bad:#FF8375; --bad-soft:#361F1C;
+    --ok:#63CD97; --ok-soft:#14281F;
+    --rule:#282E38; --rule-soft:#20252E;
+    --shadow:0 1px 2px rgba(0,0,0,.45),0 12px 30px -18px rgba(0,0,0,.7);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+  .wrap{max-width:820px;margin-inline:auto;padding:0 24px 96px}
+  mono,code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+
+  /* masthead */
+  .mast{padding:76px 0 36px;border-bottom:1px solid var(--rule)}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:500;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .eyebrow .sep{color:var(--rule)}
+  h1{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:clamp(44px,8.5vw,74px);
+    line-height:1.02;letter-spacing:-.02em;margin:18px 0 0;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--accent);font-weight:500}
+  .thesis{font-size:20px;color:var(--ink-soft);max-width:60ch;margin:20px 0 0;text-wrap:pretty}
+  .thesis b{color:var(--ink);font-weight:600}
+
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;
+    background:var(--rule-soft);border:1px solid var(--rule-soft);border-radius:8px;overflow:hidden;margin-top:32px}
+  .meta div{background:var(--card);padding:12px 15px}
+  .meta dt{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .meta dd{margin:0;font-size:15px;font-weight:600}
+  .meta dd.mono{font-size:13.5px;font-weight:500}
+
+  .flagbar{margin-top:14px;padding:15px 17px;border-radius:8px;background:var(--ok-soft);
+    border:1px solid color-mix(in srgb,var(--ok) 32%,transparent);display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+  .flagbar .lbl{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ok);font-weight:700}
+  .flagbar code{font-size:15px;color:var(--ink);word-break:break-all}
+
+  /* the path-reveal hero */
+  .reveal{margin-top:34px;background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .reveal .head{padding:14px 20px;border-bottom:1px solid var(--rule-soft);display:flex;gap:8px;align-items:center;
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .reveal .head .dotset{display:flex;gap:6px;margin-right:6px}
+  .reveal .head .dotset i{width:11px;height:11px;border-radius:50%;display:block}
+  .reveal .body{padding:20px}
+  .prow{display:flex;gap:12px;align-items:baseline;padding:9px 0;font-family:"JetBrains Mono",monospace;font-size:14px;flex-wrap:wrap}
+  .prow + .prow{border-top:1px dashed var(--rule-soft)}
+  .tag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .tag.decoy{background:var(--bad-soft);color:var(--bad)}
+  .tag.real{background:var(--ok-soft);color:var(--ok)}
+  .ppath{color:var(--muted)}
+  .prow.decoy .ppath{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--bad) 60%,transparent)}
+  .prow.real .ppath{color:var(--ink);font-weight:500}
+  .prow.real .rand{color:var(--gold);font-weight:700;background:var(--gold-soft);padding:0 4px;border-radius:3px}
+  .pval{color:var(--muted)}
+  .prow.real .pval{color:var(--ok);font-weight:500}
+  .reveal .foot{padding:13px 20px;border-top:1px solid var(--rule-soft);background:var(--sunk);
+    font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink-soft)}
+  .reveal .foot b{color:var(--accent)}
+
+  /* sections */
+  section{margin-top:60px;scroll-margin-top:24px}
+  h2{font-family:"Fraunces",Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-.01em;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+  h2 .num{display:block;font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin-bottom:9px}
+  h3{font-size:17px;font-weight:600;margin:30px 0 6px;color:var(--ink)}
+  p{margin:14px 0;max-width:68ch}
+  ul,ol{max-width:68ch;padding-left:22px}
+  li{margin:8px 0}
+  a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+  strong{font-weight:600}
+  code{font-size:.86em;background:var(--sunk);padding:.12em .38em;border-radius:4px;word-break:break-word}
+
+  pre{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:18px 0;box-shadow:var(--shadow)}
+  pre code{background:none;padding:0;border-radius:0;font-size:13px;line-height:1.6;color:var(--ink-soft);white-space:pre}
+  pre.term{background:var(--sunk)}
+  .c-dim{color:var(--muted)} .c-ok{color:var(--ok);font-weight:500} .c-bad{color:var(--bad)} .c-key{color:var(--accent)} .c-gold{color:var(--gold);font-weight:600}
+
+  .triptych{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft);border-radius:10px;overflow:hidden;margin:24px 0}
+  @media(min-width:680px){.triptych{grid-template-columns:1fr 1fr 1fr}}
+  .triptych > div{background:var(--card);padding:18px 18px 20px}
+  .triptych .n{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+  .triptych .broken .n{color:var(--bad)}
+  .triptych .solid .n{color:var(--ok)}
+  .triptych h4{margin:0 0 6px;font-size:15.5px;font-weight:600}
+  .triptych p{margin:0;font-size:14px;max-width:none;color:var(--ink-soft)}
+  .triptych .verdict{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .triptych .broken .verdict{color:var(--bad)} .triptych .solid .verdict{color:var(--ok)}
+
+  .callout{margin:22px 0;padding:16px 18px;border-radius:9px;background:var(--accent-soft);border-left:3px solid var(--accent)}
+  .callout p{margin:0;max-width:none}
+  .callout .tag2{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+
+  .tablewrap{overflow-x:auto;margin:20px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px}
+  th,td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+  th{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule);white-space:nowrap}
+  td.mono,td code{font-size:13px}
+  td .k{font-variant-numeric:tabular-nums}
+
+  footer{margin-top:74px;padding-top:22px;border-top:1px solid var(--rule);font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  @media(prefers-reduced-motion:no-preference){.prow{animation:slidein .5s cubic-bezier(.2,.7,.3,1) backwards}}
+  @keyframes slidein{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow"><span>ASIS CTF Quals 2026</span><span class="sep">/</span><span>Web</span><span class="sep">/</span><span>Baby</span></div>
+    <h1>Beneath the <em>web-root</em>.</h1>
+    <p class="thesis">A file-read API with three guards. Two are broken, one is airtight —
+      and the airtight one guards nothing. The real flag hides in a <b>random directory</b>
+      the server itself catalogued in a <b>locate database</b>.</p>
+
+    <dl class="meta">
+      <div><dt>Service</dt><dd class="mono">:29994/inspect?path=</dd></div>
+      <div><dt>Bug class</dt><dd>Path traversal &rarr; LFI</dd></div>
+      <div><dt>Guards bypassed</dt><dd>2 of 3 (3rd is a decoy)</dd></div>
+      <div><dt>Requests to flag</dt><dd>~180</dd></div>
+    </dl>
+
+    <div class="flagbar"><span class="lbl">Flag</span><code>ASIS{Baby_w3b_cha!!3nGe_$$$}</code></div>
+
+    <div class="reveal">
+      <div class="head"><span class="dotset"><i style="background:#E5695B"></i><i style="background:#E4B45C"></i><i style="background:#5FB98A"></i></span>flag&nbsp;candidates&nbsp;&mdash;&nbsp;three&nbsp;flag.txt&nbsp;on&nbsp;disk</div>
+      <div class="body">
+        <div class="prow decoy" style="animation-delay:.00s"><span class="tag decoy">decoy</span><span class="ppath">/flag.txt</span><span class="pval">ASIS{an0ther_FAK3_FLAG_:)}</span></div>
+        <div class="prow decoy" style="animation-delay:.07s"><span class="tag decoy">decoy</span><span class="ppath">/app/flag.txt</span><span class="pval">ASIS{FAKE_FLAG_:)}</span></div>
+        <div class="prow real"  style="animation-delay:.16s"><span class="tag real">real</span><span class="ppath">/app/<span class="rand">811dd3cd18605ed6761d0466f47023d4</span>/flag.txt</span><span class="pval">ASIS{Baby_w3b_cha!!3nGe_$$$}</span></div>
+      </div>
+      <div class="foot">The random directory name is unguessable &mdash; but <b>plocate.db</b> indexed it for us.</div>
+    </div>
+  </header>
+
+  <section id="tldr">
+    <h2><span class="num">TL;DR</span>Three guards, one leak</h2>
+    <p><code>GET /inspect?path=...</code> reads a file behind three checks. The two that matter
+      fall to a one-character trick each; the third is genuinely solid but protects red herrings.</p>
+    <div class="triptych">
+      <div class="broken">
+        <div class="n">Guard 1 &middot; broken</div>
+        <h4>Traversal filter</h4>
+        <p><code>replace("../","")</code> runs <em>once</em>, so <code>....//</code> survives as <code>../</code> and escapes <code>/app</code>.</p>
+        <div class="verdict">&rarr; read anywhere</div>
+      </div>
+      <div class="broken">
+        <div class="n">Guard 2 &middot; broken</div>
+        <h4>Content blocklist</h4>
+        <p>Rejects bodies with <code>ASIS</code>/<code>lib</code> &mdash; but <code>send_file</code> honours <code>Range</code>, so we window around the bytes.</p>
+        <div class="verdict">&rarr; read any bytes</div>
+      </div>
+      <div class="solid">
+        <div class="n">Guard 3 &middot; airtight</div>
+        <h4>Forbidden prefixes</h4>
+        <p><code>/etc /dev /proc /entrypoint.sh</code> can't be bypassed &mdash; the <code>/app</code> prefix blocks a leading <code>//</code>. So they're decoys.</p>
+        <div class="verdict">&rarr; dead end</div>
+      </div>
+    </div>
+    <p>The obvious flags are fakes. The real one lives in a randomly-named directory &mdash;
+      recovered by reading the <strong>plocate</strong> filesystem index the Ubuntu image shipped.</p>
+  </section>
+
+  <section id="recon">
+    <h2><span class="num">01</span>Reconnaissance</h2>
+    <p><code>GET /</code> serves the app's own source (it <code>open()</code>s <code>__file__</code>).
+      Two routes: <code>/</code> and the file-reader <code>/inspect</code>.</p>
+    <pre><code>CHALLENGE_DIR = "/app"
+FORBIDDEN_PREFIXES = ("/etc", "/dev", "/proc", "/entrypoint.sh")
+MAX_CONTENT_LENGTH = 65536
+
+def resolve(user_path):
+    ...
+    cleaned  = user_path.replace("../", "")            <span class="c-dim"># (!) single pass</span>
+    resolved = os.path.normpath(CHALLENGE_DIR + cleaned)
+    if is_forbidden(resolved): return None
+    return resolved
+
+def bad_data(data):
+    BLOCKED = (bytes([65,83,73,83]), bytes([108,105,98]))   <span class="c-dim"># b"ASIS", b"lib"</span>
+    return any(m in data for m in BLOCKED)
+
+@app.route("/inspect")
+def inspect_file():
+    resolved = resolve(request.args.get("path"))
+    ...
+    response = send_file(resolved, conditional=True)       <span class="c-dim"># (!) honours Range</span>
+    body = response.get_data()
+    if bad_data(body):                 return err          <span class="c-dim"># (!) checks the body</span>
+    if len(body) > MAX_CONTENT_LENGTH: return err
+    return jsonify({"content": base64.b64encode(body).decode()}), 200</code></pre>
+  </section>
+
+  <section id="g1">
+    <h2><span class="num">02</span>Guard 1 &mdash; traversal via a one-pass replace</h2>
+    <p><code>resolve()</code> strips <code>../</code> exactly once, then normalises. Feeding
+      <code>....//</code> leaves a live <code>../</code> behind after the replacement:</p>
+    <pre><code>"/....//x"  <span class="c-dim">--replace("../","")--&gt;</span>  "/../x"  <span class="c-dim">--normpath("/app/../x")--&gt;</span>  "/x"</code></pre>
+    <p>So <code>path=/&lt;x&gt;</code> reads <code>/app/&lt;x&gt;</code>, and <code>path=/....//&lt;abs&gt;</code>
+      reads <code>/&lt;abs&gt;</code> anywhere on disk. Reading <code>/root/.bashrc</code> succeeds &mdash;
+      which needs <code>+x</code> on the <code>0700</code> <code>/root</code>, proving the app runs as
+      <strong>root</strong>.</p>
+  </section>
+
+  <section id="g2">
+    <h2><span class="num">03</span>Guard 2 &mdash; a body blocklist that <code>Range</code> walks around</h2>
+    <p><code>bad_data()</code> inspects the returned bytes, but <code>send_file(&hellip;,
+      conditional=True)</code> processes an HTTP <code>Range</code> and the app re-reads the
+      <em>ranged</em> body. That single header defeats every part of the filter:</p>
+    <ul>
+      <li><strong>Skip blocked substrings</strong> &mdash; <code>Range: bytes=4-</code> drops the <code>ASIS</code> prefix.</li>
+      <li><strong>Beat the 64&nbsp;KiB cap</strong> &mdash; read ≤ 60&nbsp;KiB windows and stitch.</li>
+      <li><strong>An exact existence oracle</strong> &mdash; <code>Range: bytes=0-0</code> returns one byte,
+        which can never contain the 4-byte <code>ASIS</code> or 3-byte <code>lib</code>, so
+        <span class="c-key">200 &hArr; the file exists</span>, whatever its content.</li>
+    </ul>
+    <pre class="term"><code>$ curl -s '.../inspect?path=/flag.txt'              -H 'Range: bytes=4-'
+{"content":"..."}   <span class="c-bad"># ASIS{an0ther_FAK3_FLAG_:)}  &larr; fake</span>
+$ curl -s '.../inspect?path=/....//app/flag.txt'    -H 'Range: bytes=4-'
+{"content":"..."}   <span class="c-bad"># ASIS{FAKE_FLAG_:)}          &larr; fake</span></code></pre>
+  </section>
+
+  <section id="g3">
+    <h2><span class="num">04</span>Guard 3 &mdash; airtight, and pointing nowhere</h2>
+    <p>The tempting targets &mdash; <code>/entrypoint.sh</code> (the only forbidden <em>file</em>)
+      and <code>/proc/self/environ</code> (a flag env var) &mdash; are unreachable.
+      <code>is_forbidden</code> runs on the normpath-canonical string, and the only lexical dodge
+      is a leading double slash (<code>//entrypoint.sh</code> &mdash; same inode,
+      <code>!= "/entrypoint.sh"</code>). Since <code>resolve()</code> always builds
+      <code>normpath("/app" + &hellip;)</code>, the result always starts with a single
+      <code>/</code>. An exhaustive offline search over the real <code>resolve()</code> finds
+      <strong>zero</strong> bypasses.</p>
+    <div class="callout"><span class="tag2">consequence</span>
+      <p>The flag is an ordinary readable file &mdash; but at a path we must <em>discover</em>,
+        not guess. The two obvious <code>flag.txt</code> are the only ones with common names anywhere.</p>
+    </div>
+  </section>
+
+  <section id="aha">
+    <h2><span class="num">05</span>The "aha" &mdash; read the locate database</h2>
+    <p>The apt/dpkg logs (readable via the LFI) reveal an <strong>Ubuntu&nbsp;24.04</strong> image,
+      built 2026-08-28, with <strong>plocate</strong> deliberately installed and a
+      <code>plocate-updatedb.timer</code>. <code>updatedb</code> ran after the flag was placed, so
+      <code>/var/lib/plocate/plocate.db</code> &mdash; a full filesystem index &mdash; knows the hidden path.</p>
+
+    <h3>5.1 &nbsp;Pulling a 333&nbsp;KB binary through the LFI</h3>
+    <p>The DB exceeds 64&nbsp;KiB and occasionally contains the bytes <code>lib</code>/<code>ASIS</code>
+      (mostly inside its embedded zstd dictionary). We read it in ≤ 60&nbsp;KiB windows; any window
+      that returns 400 is halved recursively &mdash; single bytes never trip the filters, so recursion
+      always bottoms out on real bytes. Sizing the file first (via the <code>bytes=N-N</code> oracle)
+      avoids reading past EOF. ~176 requests total.</p>
+
+    <h3>5.2 &nbsp;Parsing plocate.db</h3>
+    <p>The header (<code>plocate</code> source <code>db.h</code>) gives the layout:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Field</th><th>Offset</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>magic</td><td class="k">0</td><td class="mono">\x00plocate</td></tr>
+        <tr><td>num_docids</td><td class="k">20</td><td class="k mono">287</td></tr>
+        <tr><td>filename_index_offset</td><td class="k">32</td><td class="k mono">61783</td></tr>
+        <tr><td>zstd_dictionary_length</td><td class="k">44</td><td class="k mono">1024</td></tr>
+        <tr><td>zstd_dictionary_offset</td><td class="k">48</td><td class="k mono">112</td></tr>
+      </tbody>
+    </table></div>
+    <p>The filename index is <code>num_docids</code> little-endian <code>uint64</code> offsets, each a
+      <strong>zstd frame compressed with the embedded dictionary</strong>. Decompressing every frame
+      with <code>zstd -D &lt;dict&gt;</code> yields <strong>9178</strong> absolute paths &mdash; and among the
+      <code>flag</code> hits, the non-decoy entry:</p>
+    <pre class="term"><code><span class="c-gold">/app/811dd3cd18605ed6761d0466f47023d4/flag.txt</span>   <span class="c-dim"># &larr; the real flag</span>
+/app/flag.txt                                    <span class="c-dim"># decoy</span>
+/flag.txt                                        <span class="c-dim"># decoy</span></code></pre>
+  </section>
+
+  <section id="flag">
+    <h2><span class="num">06</span>Grabbing the flag</h2>
+    <p>The path is under <code>/app</code>, so <code>/inspect</code> reaches it directly;
+      <code>Range: bytes=4-</code> skips the <code>ASIS</code> prefix past the blocklist.</p>
+    <pre class="term"><code>$ curl -s '.../inspect?path=/811dd3cd18605ed6761d0466f47023d4/flag.txt' \
+        -H 'Range: bytes=4-'
+{"content":"e0JhYnlfdzNiX2NoYSEhM25HZV8kJCR9"}   <span class="c-ok"># {Baby_w3b_cha!!3nGe_$$$}</span></code></pre>
+    <pre class="term"><code>$ python3 solution/solve.py
+[*] decoy /app/flag.txt   = 'ASIS{FAKE_FLAG_:)}'
+[*] decoy /flag.txt       = 'ASIS{an0ther_FAK3_FLAG_:)}'
+[*] downloading /var/lib/plocate/plocate.db ...
+[*] got 333918 bytes; parsing ...
+[*] locate db indexes 9178 paths
+[*] flag-ish paths: ['/app/811dd3cd18605ed6761d0466f47023d4/flag.txt']
+<span class="c-ok">[+] FLAG: ASIS{Baby_w3b_cha!!3nGe_$$$}</span></code></pre>
+  </section>
+
+  <section id="lessons">
+    <h2><span class="num">07</span>Lessons</h2>
+    <ul>
+      <li><strong>Blacklist sanitisation is not canonicalisation.</strong> A one-pass
+        <code>replace("../","")</code> dies to <code>....//</code>; resolve with <code>realpath</code>
+        and check the result stays inside the intended root.</li>
+      <li><strong>Content filters sit below <code>send_file</code>'s features.</strong> With
+        <code>conditional=True</code>, <code>Range</code> reshapes the body before the app inspects it &mdash;
+        blocking bytes in a response is not access control.</li>
+      <li><strong>Obscurity fails against a file index.</strong> A random flag directory is worthless once
+        <code>plocate</code>/<code>locate</code> (or <code>find</code>-able logs) are readable. Don't ship an
+        indexer that catalogues your secrets.</li>
+      <li><strong>A hand-picked denylist misses the real leak.</strong> Blocking <code>/proc</code> and
+        <code>/entrypoint.sh</code> did nothing &mdash; the flag came out of an ordinary world-readable database.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Another Baby Web! &middot; Web</span>
+    <span>Solved by Abdelkad3r</span>
+  </footer>
+</div>

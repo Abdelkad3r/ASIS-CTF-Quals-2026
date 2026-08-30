@@ -10,3 +10,4 @@ Reproducible solutions and technical notes for ASIS CTF Quals 2026.
 | Rev | ASIS Arch | Solved | [Rev/ASISArch](Rev/ASISArch/README.md) &middot; [formatted](https://claude.ai/code/artifact/50975571-18fd-4559-b0ff-9d3d52c457f6) |
 | Crypto | Linchan | Solved | [Crypto/Linchan](Crypto/Linchan/README.md) &middot; [formatted](https://claude.ai/code/artifact/17a393fa-8a38-4b5c-91c7-88a17aaaf4c7) |
 | Crypto | Mario | Solved | [Crypto/Mario](Crypto/Mario/README.md) &middot; [formatted](https://claude.ai/code/artifact/d211cf2f-b74b-4e78-b3ab-5348db3707ce) |
+| Web | Another Baby Web! | Solved | [Web/Another-Baby-Web](Web/Another-Baby-Web/README.md) &middot; [formatted](https://claude.ai/code/artifact/fde19472-0b15-45f4-8719-efaec70cb2a8) |
