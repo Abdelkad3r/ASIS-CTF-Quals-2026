@@ -1,0 +1,285 @@
+<title>The Math Blender, Unblended</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F4F1F7; --card:#FFFFFF; --sunk:#ECE7F1;
+    --ink:#1A1520; --ink-soft:#3D3646; --muted:#6D6577;
+    --accent:#A82C93; --accent-soft:#F4E0EF;
+    --gold:#9A6B12; --gold-soft:#F5EBD6;
+    --ok:#1C6B4A; --ok-soft:#DEF0E7;
+    --bad:#AE2E3E; --bad-soft:#F7E1E4;
+    --rule:#DED7E5; --rule-soft:#E9E3EF;
+    --shadow:0 1px 2px rgba(26,21,32,.06),0 12px 32px -18px rgba(120,40,110,.30);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#130F1A; --card:#1B1526; --sunk:#221A2F;
+    --ink:#EDE7F3; --ink-soft:#C7BFD3; --muted:#948AA3;
+    --accent:#E56FC8; --accent-soft:#2B1730;
+    --gold:#E0B45E; --gold-soft:#2C2412;
+    --ok:#5FCB97; --ok-soft:#14271E;
+    --bad:#FF8592; --bad-soft:#331A20;
+    --rule:#2C2439; --rule-soft:#221B2E;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 14px 34px -18px rgba(0,0,0,.75);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#130F1A; --card:#1B1526; --sunk:#221A2F;
+    --ink:#EDE7F3; --ink-soft:#C7BFD3; --muted:#948AA3;
+    --accent:#E56FC8; --accent-soft:#2B1730;
+    --gold:#E0B45E; --gold-soft:#2C2412;
+    --ok:#5FCB97; --ok-soft:#14271E;
+    --bad:#FF8592; --bad-soft:#331A20;
+    --rule:#2C2439; --rule-soft:#221B2E;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 14px 34px -18px rgba(0,0,0,.75);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+  .wrap{max-width:830px;margin-inline:auto;padding:0 24px 96px}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+
+  /* masthead */
+  .mast{padding:78px 0 34px;border-bottom:1px solid var(--rule)}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .eyebrow .sep{color:var(--rule)}
+  h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:clamp(52px,10vw,92px);
+    line-height:.98;letter-spacing:.005em;margin:16px 0 0;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--accent)}
+  .thesis{font-size:20px;color:var(--ink-soft);max-width:60ch;margin:20px 0 0;text-wrap:pretty}
+  .thesis b{color:var(--ink);font-weight:600}
+
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:1px;
+    background:var(--rule-soft);border:1px solid var(--rule-soft);border-radius:8px;overflow:hidden;margin-top:32px}
+  .meta div{background:var(--card);padding:12px 15px}
+  .meta dt{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .meta dd{margin:0;font-size:15px;font-weight:600}
+  .meta dd.mono{font-size:13px;font-weight:500}
+
+  .flagbar{margin-top:14px;padding:15px 17px;border-radius:8px;background:var(--ok-soft);
+    border:1px solid color-mix(in srgb,var(--ok) 32%,transparent);display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+  .flagbar .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ok);font-weight:600}
+  .flagbar code{font-size:14px;color:var(--ink);word-break:break-all}
+
+  /* the einsum-unblend reveal */
+  .reveal{margin-top:34px;background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .reveal .lane{padding:20px 22px}
+  .reveal .lane+.lane{border-top:1px solid var(--rule-soft)}
+  .reveal .cap{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  .reveal .before .cap{color:var(--muted)} .reveal .after .cap{color:var(--accent)}
+  .reveal .f{font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;color:var(--ink-soft);overflow-x:auto;white-space:pre}
+  .reveal .after .f{color:var(--ink);font-size:15px;white-space:normal}
+  .reveal .after .big{font-size:19px}
+  .reveal .after b{color:var(--accent);font-weight:600}
+  .reveal .arrow{display:flex;justify-content:center;padding:2px 0 0;color:var(--accent);font-size:18px}
+
+  /* 7-round pass strip */
+  .rounds{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin:26px 0}
+  .rchip{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:11px 12px;box-shadow:var(--shadow)}
+  .rchip .r{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .rchip .e{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;font-variant-numeric:tabular-nums}
+  .rchip .p{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--ok);margin-top:5px}
+  .rchip .p::before{content:"● "}
+
+  section{margin-top:60px;scroll-margin-top:24px}
+  h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:34px;letter-spacing:.005em;line-height:1.12;margin:0 0 6px;text-wrap:balance}
+  h2 .num{display:block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin-bottom:9px}
+  h3{font-size:17px;font-weight:600;margin:30px 0 6px;color:var(--ink)}
+  p{margin:14px 0;max-width:68ch}
+  ul,ol{max-width:68ch;padding-left:22px} li{margin:8px 0}
+  a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+  strong{font-weight:600}
+  code{font-size:.86em;background:var(--sunk);padding:.12em .38em;border-radius:4px;word-break:break-word}
+  pre{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:18px 0;box-shadow:var(--shadow)}
+  pre code{background:none;padding:0;border-radius:0;font-size:13px;line-height:1.6;color:var(--ink-soft);white-space:pre}
+  pre.term{background:var(--sunk)}
+  .c-dim{color:var(--muted)} .c-ok{color:var(--ok);font-weight:500} .c-acc{color:var(--accent);font-weight:600} .c-gold{color:var(--gold);font-weight:600}
+
+  .callout{margin:22px 0;padding:16px 18px;border-radius:9px;background:var(--accent-soft);border-left:3px solid var(--accent)}
+  .callout p{margin:0;max-width:none}
+  .callout .tag2{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+
+  .eqbox{margin:18px 0;padding:16px 18px;border:1px dashed var(--rule);border-radius:9px;background:var(--sunk)}
+  .eqbox .r{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--ink);margin:6px 0}
+  .eqbox .r .c-dim{font-family:inherit}
+
+  footer{margin-top:74px;padding-top:22px;border-top:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  @media(prefers-reduced-motion:no-preference){.rchip{animation:pop .45s cubic-bezier(.2,.7,.3,1) backwards}}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow"><span>ASIS CTF Quals 2026</span><span class="sep">/</span><span>Crypto</span><span class="sep">/</span><span>Medium</span></div>
+    <h1>The math blender, <em>unblended</em>.</h1>
+    <p class="thesis">A "Non-Linear Hamiltonian Authenticator" that is really a
+      <b>softmax-attention layer</b> in a physics costume. Its secret matrices reset every round —
+      so we recover a <b>functional twin</b> by least squares and forge the tags.</p>
+
+    <dl class="meta">
+      <div><dt>Service</dt><dd class="mono">nc … 1337</dd></div>
+      <div><dt>Secret / round</dt><dd>3×(4×4 + 4) = 60</dd></div>
+      <div><dt>Rounds</dt><dd>7 · fresh keys</dd></div>
+      <div><dt>Tolerance</dt><dd class="mono">1e-6</dd></div>
+    </dl>
+
+    <div class="flagbar"><span class="lbl">Flag</span><code>ASIS{c0uPleD_n0nL1n3Ar_Dynam!c5_R3c0vEry_v1A_p0l3s_&amp;_l34st_squ4r3s!!}</code></div>
+
+    <div class="reveal">
+      <div class="lane before">
+        <p class="cap">what the server prints</p>
+        <div class="f">microstate_energies = einsum('j,jk,ik-&gt;i', x_tail, A[c].T, X)
+boltzmann = exp(energies - max);  Z = sum(boltzmann)
+observables = X @ B[c]
+expectation = (boltzmann @ observables) / Z          # per channel c</div>
+      </div>
+      <div class="arrow">&darr;</div>
+      <div class="lane after">
+        <p class="cap">what it actually computes</p>
+        <div class="f big">T(X) = <b>&Sigma;<sub>c</sub></b> softmax<sub>i</sub>( X[i] &middot; (<b>A[c]</b>&middot;x_tail) ) &middot; ( X[i] &middot; <b>B[c]</b> )</div>
+        <div class="f" style="margin-top:8px">a 3-head attention layer &mdash; A[c] scores the last token, B[c] is the value projection</div>
+      </div>
+    </div>
+  </header>
+
+  <section id="tldr">
+    <h2><span class="num">TL;DR</span>Attention in a lab coat</h2>
+    <p>Unwinding the <code>einsum</code> turns the "Hamiltonian" into a plain softmax-attention PRF.
+      The secret is 60 numbers per round (all <code>~U(0.5,2)</code>), regenerated each of 7 rounds;
+      we get ≤1200 exact <code>eval</code> queries, then must predict 6 random sequences to
+      <code>1e-6</code>.</p>
+    <p>Because the oracle is <strong>noise-free</strong>, any parameters reproducing ~150 tags
+      reproduce <code>T</code> everywhere — a <em>functional twin</em>, not the true secret. We fit
+      all 60 by <strong>Levenberg–Marquardt with an exact analytic Jacobian</strong>, restarting
+      from the <code>U(0.5,2)</code> prior until the residual hits <code>~1e-15</code>, then forge.
+      <strong>Pipelining</strong> the queries and running restarts <strong>in parallel</strong> keeps
+      it inside the per-connection time budget.</p>
+    <div class="rounds">
+      <div class="rchip" style="animation-delay:.00s"><div class="r">Round 1</div><div class="e">8.9e-16</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.05s"><div class="r">Round 2</div><div class="e">1.3e-15</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.10s"><div class="r">Round 3</div><div class="e">3.1e-15</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.15s"><div class="r">Round 4</div><div class="e">2.7e-15</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.20s"><div class="r">Round 5</div><div class="e">8.9e-16</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.25s"><div class="r">Round 6</div><div class="e">2.7e-15</div><div class="p">pass</div></div>
+      <div class="rchip" style="animation-delay:.30s"><div class="r">Round 7</div><div class="e">2.2e-15</div><div class="p">flag</div></div>
+    </div>
+    <p class="c-dim" style="font-size:14px">Per-round <code>max_err</code> — about nine orders of magnitude inside the <code>1e-6</code> tolerance.</p>
+  </section>
+
+  <section id="proto">
+    <h2><span class="num">01</span>Protocol</h2>
+    <p>After a 20-bit SHA-256 proof of work, each of 7 rounds accepts:</p>
+    <ul>
+      <li><code>eval &lt;json_matrix&gt;</code> — the float tag of a sequence <code>X</code> of shape
+        <code>(L,4)</code>, <code>1 ≤ L ≤ 20</code> (1200/round, 0.03 s server delay each).</li>
+      <li><code>challenge</code> — 6 random sequences of lengths <code>[3,5,7,9,13,17]</code>,
+        then it immediately expects <code>verify &lt;json_tags&gt;</code>; pass iff
+        <code>max|pred − true| &lt; 1e-6</code>.</li>
+    </ul>
+    <p>We cannot <code>eval</code> the challenge sequences, and every round regenerates the secret —
+      so we must recover the map well enough to evaluate it on arbitrary inputs.</p>
+  </section>
+
+  <section id="unwind">
+    <h2><span class="num">02</span>Unwinding the "Hamiltonian"</h2>
+    <p>Expand the einsum (<code>A[c].T[j,k] = A[c][k,j]</code>):</p>
+    <div class="eqbox">
+      <div class="r">energies[i] = &Sigma;<sub>j,k</sub> x_tail[j] &middot; A[c][k,j] &middot; X[i,k]</div>
+      <div class="r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = &Sigma;<sub>k</sub> X[i,k] &middot; ( &Sigma;<sub>j</sub> A[c][k,j] &middot; x_tail[j] )</div>
+      <div class="r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <span class="c-acc">X[i] &middot; (A[c] @ x_tail)</span></div>
+    </div>
+    <p>The <code>gauge_shift = max</code> is just the numerically-stable softmax shift and cancels in
+      the ratio; <code>boltzmann/Z</code> <em>is</em> <code>softmax(energies)</code>, and
+      <code>observables[i] = X[i]·B[c]</code>. Summed over channels:</p>
+    <div class="eqbox"><div class="r" style="font-size:15px">T(X) = &Sigma;<sub>c</sub> softmax<sub>i</sub>( X[i] &middot; (A[c]&middot;x_tail) ) &middot; ( X[i] &middot; B[c] )</div></div>
+
+    <h3>What leaks for free — and why it's not enough</h3>
+    <p>With <code>L = 1</code>, softmax over one element is <code>1</code> regardless of <code>A</code>,
+      so <code>T([v]) = v · (Σ_c B[c])</code>. Four queries give <code>Σ_c B[c]</code> — but the
+      length-≥3 challenges exercise the full per-channel nonlinearity, so we need every
+      <code>A[c]</code>, <code>B[c]</code> (or a functional equivalent).</p>
+  </section>
+
+  <section id="fit">
+    <h2><span class="num">03</span>Recovery as an exact nonlinear fit</h2>
+    <p>One round is system identification of a known form with <strong>60 unknowns</strong>. Three
+      observations make it easy:</p>
+    <ul>
+      <li><strong>Noise-free ⇒ functional equivalence suffices.</strong> The oracle returns exact
+        <code>float64</code>. Match ~150 generic tags (≫ 60 params) and you match <code>T</code>
+        everywhere — channel permutations and other symmetries are harmless because only
+        <code>T</code> is scored.</li>
+      <li><strong><code>B</code> is linear given <code>A</code>.</strong> The softmax weights
+        <code>w_c</code> depend only on <code>A</code>, and <code>T = Σ_c (w_c·X)·B[c]</code>.</li>
+      <li><strong>Clean analytic Jacobian.</strong> With <code>o_c = X·B[c]</code>,
+        <code>val_c = w_c·o_c</code>:</li>
+    </ul>
+    <div class="eqbox">
+      <div class="r">&part;T/&part;B[c] = w<sub>c</sub> &middot; X</div>
+      <div class="r">&part;T/&part;A[c] = outer( X&#7488; &middot; ( w<sub>c</sub> &odot; (o<sub>c</sub> &minus; val<sub>c</sub>) ), x_tail )</div>
+    </div>
+    <p>LM over all 60 parameters with that Jacobian, vectorised across queries (padded to a common
+      length with a <code>−∞</code> energy mask). The landscape is cleanly <strong>bimodal</strong>:
+      a restart either finds the true basin (<code>rmse ~ 1e-15</code>) or an obviously-wrong one
+      (<code>rmse &gt; 1e-3</code>), so success is unambiguous — restart from the
+      <code>U(0.5,2)</code> prior until <code>rmse &lt; 1e-7</code>.</p>
+    <div class="callout"><span class="tag2">why it generalises</span>
+      <p>A fit reaching <code>rmse ~ 1e-15</code> on 150 random sequences predicts the 6 challenge
+        sequences at <code>~1e-15</code> too — the model class is rigid and vastly over-determined.</p>
+    </div>
+  </section>
+
+  <section id="net">
+    <h2><span class="num">04</span>Surviving the network</h2>
+    <p>Two problems appear only against the live service:</p>
+    <ul>
+      <li><strong>~120 s per-connection limit.</strong> The first attempt died at round 4:
+        150–200 <em>synchronous</em> <code>eval</code> round-trips at ~0.18 s each is ~30 s/round.
+        Fix: <strong>pipeline</strong> — write all <code>eval</code> lines, flush, then read all
+        responses. The query phase collapses to roughly the server delay
+        (<code>150 × 0.03 ≈ 4.5 s</code>) plus one RTT.</li>
+      <li><strong>Unlucky fits.</strong> Some rounds need many restarts (one local round took 83 s).
+        Fix: run the LM restarts <strong>in parallel</strong> across CPU cores, stopping at the first
+        <code>rmse &lt; 1e-7</code>. Worst-case fit drops to ~10 s.</li>
+    </ul>
+    <p>The rest is routine: a brute-force loop for the 20-bit PoW and JSON line framing.</p>
+  </section>
+
+  <section id="exec">
+    <h2><span class="num">05</span>Execution</h2>
+    <pre class="term"><code>$ python3 solution/solve.py 65.109.208.91 1337
+[*] solving PoW 20 bits
+[*] PoW ok
+[*] round 1: fit rmse=1.09e-15 (5.2s)
+[*] round 1 -&gt; ok: Round 1 authenticated! (max_err=8.88e-16)
+...
+[*] round 7: fit rmse=1.35e-15 (10.9s)
+[*] round 7 -&gt; ok: All rounds authenticated! (max_err=2.22e-15)
+<span class="c-ok">[+] FLAG: ASIS{c0uPleD_n0nL1n3Ar_Dynam!c5_R3c0vEry_v1A_p0l3s_&amp;_l34st_squ4r3s!!}</span></code></pre>
+    <p>All 7 rounds authenticated in ≈ 70 s, each <code>max_err ≈ 1e-15</code>. The flag names the
+      method: <span class="c-gold">recovery via poles &amp; least squares</span>.</p>
+  </section>
+
+  <section id="lessons">
+    <h2><span class="num">06</span>Lessons</h2>
+    <ul>
+      <li><strong>Vocabulary is not security.</strong> "Coupling tensors", "partition function",
+        "gauge stabilization" — it's a 3-head softmax-attention layer. Unwind the <code>einsum</code>.</li>
+      <li><strong>A deterministic, noise-free oracle is a gift.</strong> Exactness turns key recovery
+        into curve fitting, and reduces the goal to "find any functional twin", sidestepping every
+        internal symmetry.</li>
+      <li><strong>Exploit linear substructure.</strong> <code>B</code> linear given <code>A</code>
+        halves the nonlinearity and makes the Jacobian trivial to condition.</li>
+      <li><strong>Interactive limits are part of the crypto.</strong> The real work was budget
+        management — pipelining and parallel restarts to fit seven independent 60-parameter systems
+        inside one time-limited connection.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Headache &middot; Crypto</span>
+    <span>Solved by Abdelkad3r</span>
+  </footer>
+</div>
