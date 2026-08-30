@@ -1,0 +1,450 @@
+<title>Less is more</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #ECEEF1;
+    --surface: #FBFCFD;
+    --panel: #F2F4F7;
+    --ink: #191C22;
+    --muted: #5C636F;
+    --line: #D6DAE1;
+    --line-soft: #E4E7EC;
+    --structure: #2C5D7C;      /* quiet slate-teal for structure */
+    --structure-soft: #E1EAF0;
+    --accent: #B23A2E;         /* the leak / the hit */
+    --accent-soft: #F7E4E1;
+    --hidden: #8A93A0;         /* a hidden/ZK element */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1013;
+      --surface: #171A1F;
+      --panel: #13161A;
+      --ink: #E6E8EC;
+      --muted: #8B93A0;
+      --line: #262A31;
+      --line-soft: #1E2228;
+      --structure: #77B0D0;
+      --structure-soft: #15222B;
+      --accent: #EE6E5E;
+      --accent-soft: #2A1714;
+      --hidden: #6A7280;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1013;
+    --surface: #171A1F;
+    --panel: #13161A;
+    --ink: #E6E8EC;
+    --muted: #8B93A0;
+    --line: #262A31;
+    --line-soft: #1E2228;
+    --structure: #77B0D0;
+    --structure-soft: #15222B;
+    --accent: #EE6E5E;
+    --accent-soft: #2A1714;
+    --hidden: #6A7280;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Spline Sans", system-ui, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 50rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.1rem, 4vw, 2.4rem) 6rem;
+    display: flex; flex-direction: column; gap: 2.5rem;
+  }
+
+  h1, h2, h3 { font-family: "Fraunces", Georgia, serif; margin: 0; font-weight: 600; }
+  h1 {
+    font-size: clamp(2.7rem, 7.5vw, 4rem); font-weight: 700;
+    letter-spacing: -.02em; line-height: 1.0; text-wrap: balance;
+  }
+  h2 { font-size: 1.65rem; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+  h3 { font-size: 1.1rem; }
+  p { margin: 0; }
+  .lede {
+    font-family: "Fraunces", Georgia, serif; font-weight: 400;
+    font-size: 1.4rem; line-height: 1.35; color: var(--muted); max-width: 40ch;
+  }
+  .eyebrow, .cap, .chip, th, .idx { font-family: "Spline Sans", system-ui, sans-serif; }
+  .eyebrow {
+    font-size: .69rem; font-weight: 600; letter-spacing: .17em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  strong { font-weight: 600; }
+
+  code {
+    font-family: "Spline Sans Mono", ui-monospace, Menlo, monospace;
+    font-size: .84em; background: var(--structure-soft); color: var(--structure);
+    padding: .08em .34em; border-radius: 2px;
+  }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  header { display: flex; flex-direction: column; gap: 1.25rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    font-size: .71rem; font-weight: 500; padding: .26rem .6rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--muted); background: var(--surface);
+  }
+  .chip.mark { color: var(--accent); border-color: var(--accent); }
+
+  .code, .flagbox {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 3px; padding: .95rem 1.1rem; overflow-x: auto;
+  }
+  .code pre, .flagbox pre {
+    margin: 0; font-family: "Spline Sans Mono", ui-monospace, Menlo, monospace;
+    font-size: .78rem; line-height: 1.65; color: var(--ink);
+  }
+  .cmt { color: var(--muted); }
+  .hl { color: var(--accent); font-weight: 500; }
+  .st { color: var(--structure); }
+  .cap {
+    display: block; font-size: .66rem; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .flagbox { background: var(--accent-soft); border-color: var(--accent); }
+  .flagbox pre { color: var(--accent); font-weight: 500; font-size: clamp(.7rem, 2.3vw, .96rem); }
+
+  figure {
+    margin: 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 1.2rem 1.15rem .9rem;
+    display: flex; flex-direction: column; gap: .85rem;
+  }
+  figure svg { max-width: 100%; height: auto; display: block; color: var(--ink); }
+  figcaption { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+  .lg { fill: none; stroke: currentColor; }
+  .lg-faint { fill: none; stroke: var(--muted); opacity: .45; }
+  .lg-struct { stroke: var(--structure); fill: none; }
+  .lg-accent { stroke: var(--accent); fill: none; }
+  .mk-accent { fill: var(--accent); }
+  .nd { fill: var(--surface); stroke: var(--muted); }
+  .nd-rev { fill: var(--structure-soft); stroke: var(--structure); }
+  .nd-hid { fill: var(--panel); stroke: var(--hidden); stroke-dasharray: 3 2.5; }
+  .nd-hit { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+  .tx { font-family: "Spline Sans", sans-serif; font-size: 12.5px; fill: currentColor; }
+  .tsm { font-family: "Spline Sans", sans-serif; font-size: 10.5px; fill: var(--muted); }
+  .ta { font-family: "Spline Sans Mono", monospace; font-size: 11px; fill: var(--accent); }
+  .tstruct { font-family: "Spline Sans", sans-serif; font-size: 11px; fill: var(--structure); }
+
+  .step {
+    display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem;
+    align-items: baseline; padding-top: 1.9rem; border-top: 1px solid var(--line-soft);
+  }
+  .step .idx {
+    font-size: .76rem; font-weight: 600; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .step .body { display: flex; flex-direction: column; gap: .95rem; min-width: 0; }
+  @media (max-width: 34rem) { .step { grid-template-columns: 1fr; gap: .3rem; } }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .42rem .65rem; border-bottom: 1px solid var(--line-soft); }
+  th {
+    font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td.mono, th.mono { font-family: "Spline Sans Mono", ui-monospace, Menlo, monospace; font-size: .77rem; }
+  td.k { color: var(--structure); white-space: nowrap; }
+  tr.win td { color: var(--accent); font-weight: 600; }
+
+  .prose { display: flex; flex-direction: column; gap: 1rem; }
+  ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .5rem; }
+  li::marker { color: var(--accent); }
+
+  .note {
+    border-left: 2px solid var(--structure); padding: .05rem 0 .05rem 1rem;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .note h3 { color: var(--structure); font-size: 1.02rem; }
+
+  footer {
+    border-top: 1px solid var(--line-soft); padding-top: 1.3rem;
+    font-size: .83rem; color: var(--muted);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">ASIS CTF Quals 2026 &middot; Crypto</span>
+    <h1>Less is more</h1>
+    <p class="lede">A zero-knowledge signer that, once in a while, reveals a leaf it was
+      still asking about.</p>
+    <div class="meta">
+      <span class="chip">code equivalence</span>
+      <span class="chip">GF(827)</span>
+      <span class="chip">cut-and-choose</span>
+      <span class="chip">iteration skip</span>
+      <span class="chip mark">solved</span>
+    </div>
+    <div class="flagbox">
+      <span class="cap">Flag</span>
+      <pre>ASIS{iZ_1tEr4t10n_5k1p_m4ke5_n0_1nn0c3nT_r3sPonse!!!?}</pre>
+    </div>
+  </header>
+
+  <section class="prose">
+    <h2>The coincidence that shouldn't happen</h2>
+    <p>Each signature is a cut-and-choose over a Merkle tree of 345 leaves. The rule that keeps
+      it zero-knowledge is simple: a leaf is either <em>challenged</em> (it carries a response,
+      so its seed stays hidden) or <em>revealed</em> (its seed ships in the cover, so it carries
+      no response) &mdash; never both. An <strong>iteration skip</strong> breaks that rule for
+      one leaf:</p>
+
+    <figure>
+      <svg viewBox="0 0 720 320" role="img"
+           aria-label="A Merkle tree: most challenged leaves keep their seed hidden, revealed leaves carry no response, but one leaf is both revealed and challenged, so its known seed plus its response leak the secret permutation.">
+        <!-- tree edges -->
+        <g class="lg-faint" stroke-width="1.3">
+          <line x1="360" y1="46" x2="200" y2="104"></line>
+          <line x1="360" y1="46" x2="520" y2="104"></line>
+          <line x1="200" y1="104" x2="120" y2="162"></line>
+          <line x1="200" y1="104" x2="280" y2="162"></line>
+          <line x1="520" y1="104" x2="440" y2="162"></line>
+          <line x1="520" y1="104" x2="600" y2="162"></line>
+        </g>
+        <!-- revealed subtree highlight (right-inner covers a run of leaves) -->
+        <g class="lg-struct" stroke-width="1.6">
+          <line x1="440" y1="162" x2="400" y2="222"></line>
+          <line x1="440" y1="162" x2="480" y2="222"></line>
+        </g>
+
+        <!-- internal nodes -->
+        <circle cx="360" cy="46" r="10" class="nd"></circle>
+        <circle cx="200" cy="104" r="9" class="nd"></circle>
+        <circle cx="520" cy="104" r="9" class="nd"></circle>
+        <circle cx="120" cy="162" r="9" class="nd"></circle>
+        <circle cx="280" cy="162" r="9" class="nd"></circle>
+        <circle cx="440" cy="162" r="9" class="nd-rev"></circle>
+        <circle cx="600" cy="162" r="9" class="nd"></circle>
+        <text x="360" y="34" class="tsm" text-anchor="middle">root</text>
+        <text x="462" y="150" class="tstruct">cover node u</text>
+
+        <!-- leaves under the revealed node -->
+        <rect x="384" y="222" width="32" height="24" rx="3" class="nd-rev"></rect>
+        <rect x="464" y="222" width="32" height="24" rx="3" class="nd-hit"></rect>
+        <text x="400" y="238" class="tsm" text-anchor="middle">f=0</text>
+        <text x="400" y="266" class="tsm" text-anchor="middle">b=0</text>
+        <text x="480" y="238" class="ta" text-anchor="middle">f=0</text>
+        <text x="480" y="266" class="ta" text-anchor="middle">b&ne;0</text>
+
+        <!-- a normal challenged (hidden) leaf and a normal revealed leaf -->
+        <rect x="104" y="222" width="32" height="24" rx="3" class="nd-hid"></rect>
+        <text x="120" y="238" class="tsm" text-anchor="middle">f=1</text>
+        <text x="120" y="266" class="tsm" text-anchor="middle">b&ne;0</text>
+        <text x="120" y="286" class="tsm" text-anchor="middle">hidden &rarr; ZK</text>
+        <line x1="280" y1="171" x2="280" y2="222" class="lg-faint" stroke-width="1.3"></line>
+        <rect x="264" y="222" width="32" height="24" rx="3" class="nd"></rect>
+        <text x="280" y="238" class="tsm" text-anchor="middle">f=0</text>
+        <text x="280" y="266" class="tsm" text-anchor="middle">b=0</text>
+        <text x="280" y="286" class="tsm" text-anchor="middle">no response</text>
+
+        <!-- the leak annotation -->
+        <text x="480" y="286" class="ta" text-anchor="middle">the hit</text>
+        <path d="M 540 234 H 640" class="lg-accent" stroke-width="1.6"
+              marker-end="url(#a)"></path>
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L10 5 L0 10 z" class="mk-accent"></path>
+          </marker>
+        </defs>
+        <text x="648" y="224" class="tx">seed revealed</text>
+        <text x="648" y="240" class="tx">by the cover</text>
+        <text x="648" y="262" class="ta">+ response</text>
+        <text x="648" y="278" class="tx" style="font-size:11px">= v is known</text>
+      </svg>
+      <figcaption>Normally a challenged leaf (<code>b&ne;0</code>) stays hidden (<code>f=1</code>)
+        and a revealed leaf (<code>f=0</code>) is not challenged (<code>b=0</code>). The
+        highlighted leaf is <strong>both</strong>: the cover hands over its seed, yet it still
+        carries a response &mdash; so the secret set <code>v</code> that response depends on
+        becomes computable, and the response leaks the permutation.</figcaption>
+    </figure>
+  </section>
+
+  <section class="step">
+    <span class="idx">01</span>
+    <div class="body">
+      <h2>The scheme</h2>
+      <p>A code-equivalence signature over GF(827): <code>P=827, N=548, K=274, T=345, W=75</code>,
+        with 7 real keys hidden among 17 public slots. The public code <code>g</code> is a
+        <code>K&times;N</code> Cauchy matrix in RREF. Each secret key is a <strong>monomial
+        map</strong> &mdash; a column permutation <code>p</code> and a diagonal <code>d</code>
+        &mdash; and its public key is:</p>
+      <div class="code">
+<pre>public(g, (p, d)) = RREF([[ g[i][p[j]] &middot; inv(d[j]) <span class="st">for</span> j <span class="st">in</span> range(N)] <span class="st">for</span> i <span class="st">in</span> range(K)])</pre>
+      </div>
+      <p>The flag is sealed under a pad derived from the seven real keys, with each diagonal
+        normalised by <code>d[0]</code>:</p>
+      <div class="code">
+<pre>pad    = SHAKE-256("o" + pack_key(box.key))
+sealed = flag XOR pad</pre>
+      </div>
+      <p>So the target is the seven <code>(p, d)</code> pairs, each <code>d</code> only needed up
+        to a global scalar.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">02</span>
+    <div class="body">
+      <h2>What a response reveals</h2>
+      <p>For every challenged leaf <code>i</code> with class <code>b[i]=x</code>, the response
+        is built from a <strong>secret</strong> half-set of columns drawn from the leaf's own
+        seed:</p>
+      <div class="code">
+<pre>v = take(leaf[i], 'n', N, K)              <span class="cmt"># a secret K-subset of the N columns</span>
+rsp += [ label(cmt, leaf[i]),
+         bits({ p_x&#8315;&sup1;[j] : j &isin; v }) ]     <span class="cmt"># reveals S = { i : p_x[i] &isin; v }</span></pre>
+      </div>
+      <p>The response is the <em>set</em> <code>S = { i : p_x[i] &isin; v }</code>. Honestly this
+        is zero-knowledge: <code>v</code> lives inside the hidden leaf seed, so you learn a
+        <code>K</code>-subset with no idea which columns it corresponds to.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">03</span>
+    <div class="body">
+      <h2>The iteration skip</h2>
+      <div class="code">
+<pre>target = (37 * serial + 11) % T
+<span class="st">if</span> sha256('v' + root)[:2] % 100 &lt; 72:
+    f[target] = <span class="hl">self.state[target]</span>     <span class="cmt"># overwrite with LAST round's indicator</span>
+self.state = f</pre>
+      </div>
+      <p>72&nbsp;% of the time the signer reuses the <em>previous</em> signature's indicator at
+        <code>target</code> instead of recomputing it. If that carried value was <code>0</code>
+        while this round's challenge has <code>b[target]&nbsp;&ne;&nbsp;0</code>, the leaf is a
+        <strong>hit</strong> &mdash; challenged, yet revealed. That is the coincidence in the
+        diagram, and it is the entire vulnerability. The maths of the code is untouched; a single
+        reused bit of state is what leaks.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">04</span>
+    <div class="body">
+      <h2>Reconstructing the hits</h2>
+      <p><code>_hit</code> is stripped from the capture, but every hit is recomputable from public
+        data:</p>
+      <ul>
+        <li><code>serial = int(msg[1:])</code>, so <code>target = (37&middot;serial+11) mod T</code>.</li>
+        <li>Recompute <code>b = chal(cmt, salt, msg)</code>; skip records with
+          <code>b[target]=0</code>.</li>
+        <li>Invert <code>token(cmt, u) = u XOR (sha256('m'+cmt)[:2] &amp; 1023)</code> to get each
+          cover node, and if an internal node covers <code>target</code>, <strong>descend the
+          tree</strong> to <code>leaf[target]</code>.</li>
+        <li>Confirm with <code>label(cmt, leaf[target])</code> against the responses.</li>
+      </ul>
+      <div class="code">
+<pre>[+] candidate hits: 830   <span class="hl">label-matched: 830</span>
+[+] per class: {1:127, 2:105, 3:121, 4:106, 5:123, 6:128, 7:120}</pre>
+      </div>
+      <p>Every one of the 830 hits label-matches &mdash; the tree descent is exactly right &mdash;
+        and each class clears the ~90 the generator loops until.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">05</span>
+    <div class="body">
+      <h2>Voting out the permutation</h2>
+      <p>For a hit we now know <em>both</em> <code>v = take(leaf[target], 'n', N, K)</code> and the
+        response set <code>S</code>. Since <code>|v| = |S| = K = N/2</code> and <code>p_x</code>
+        is a bijection, the response says exactly</p>
+      <div class="code">
+<pre>p_x[i] &isin; v   &hArr;   i &isin; S            <span class="cmt"># and p_x[i] &isin; v&#7580; for i &notin; S</span></pre>
+      </div>
+      <p>Each hit confines every position to one side of a random balanced split. <strong>Vote</strong>:
+        the true <code>p_x[i]</code> lands on the allowed side in every honest hit (~110 votes);
+        any other column only about half the time (~55); the rare 14&nbsp;% fault records are
+        outvoted. <code>argmax</code> gives a valid permutation for all seven classes, minimum
+        vote margin 21.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">06</span>
+    <div class="body">
+      <h2>Diagonals from the public keys</h2>
+      <p>With <code>p_x</code> fixed, the real public key satisfies
+        <code>M = RREF(g[:,p_x]&middot;diag(1/d))</code>. Column scaling never changes which
+        columns are pivots, so match each permutation to its slot by pivot set, then solve
+        <code>d</code> linearly:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>class</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+          <tbody>
+            <tr><td>public key</td><td class="mono">0</td><td class="mono">4</td><td class="mono">14</td><td class="mono">2</td><td class="mono">6</td><td class="mono">16</td><td class="mono">12</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Let <code>Ginv = (g[:,p][:,piv])&#8315;&sup1;</code> and <code>W = Ginv&middot;g[:,p]</code>;
+        then <code>d[j]/d[piv[t]] = W[t,j]/M[t,j]</code>. Propagate column by column, verify
+        <code>public(g,(p,d)) == M</code> exactly, and the <code>/d[0]</code> normalisation in
+        <code>pack_key</code> discards the leftover global scalar.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">07</span>
+    <div class="body">
+      <h2>Opening the vault</h2>
+      <div class="code">
+<pre><span class="cmt">$</span> python3 solution/solve.py
+[+] 5963 records, 17 public keys, 54-byte flag
+[+] class 1: 127 hits, permutation recovered (min vote margin 29)
+ ...
+[+] class 1: matched public key #0, diagonal recovered and verified
+ ...
+[+] flag: <span class="hl">ASIS{iZ_1tEr4t10n_5k1p_m4ke5_n0_1nn0c3nT_r3sPonse!!!?}</span></pre>
+      </div>
+      <p>The name says it: <em>an iteration skip makes no innocent response.</em></p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">&mdash;</span>
+    <div class="body">
+      <h2>Takeaways</h2>
+      <ul>
+        <li><strong>A cut-and-choose is zero-knowledge only while its two cases stay disjoint.</strong>
+          "Challenged &rArr; hidden" and "revealed &rArr; unchallenged" are the whole guarantee;
+          one leaf that is both collapses it into a plaintext leak.</li>
+        <li><strong>Reused state across signatures is the bug, not the maths.</strong> The Cauchy
+          code and monomial masking are sound &mdash; carrying one indicator bit from the previous
+          run is what leaks.</li>
+        <li><strong>Set-membership leaks compose.</strong> One hit only says which <em>half</em>
+          a column sits in, but ~110 balanced random halves intersect down to a point &mdash; no
+          cryptanalysis beyond counting.</li>
+        <li><strong>Recover structure, then scale.</strong> Once the permutation is known the
+          diagonal is a linear problem against the public key, and the KDF's own normalisation
+          makes the global scalar irrelevant.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Crypto &middot; Less is more</span>
+    <span>Solver and challenge material: <code>Crypto/LessIsMore/</code></span>
+  </footer>
+
+</div>

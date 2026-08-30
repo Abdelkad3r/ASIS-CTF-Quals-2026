@@ -13,3 +13,4 @@ Reproducible solutions and technical notes for ASIS CTF Quals 2026.
 | Web | Another Baby Web! | Solved | [Web/Another-Baby-Web](Web/Another-Baby-Web/README.md) &middot; [formatted](https://claude.ai/code/artifact/fde19472-0b15-45f4-8719-efaec70cb2a8) |
 | Crypto | Headache | Solved | [Crypto/Headache](Crypto/Headache/README.md) &middot; [formatted](https://claude.ai/code/artifact/b5e1e800-da8f-41d2-89da-11bb4f721cd6) |
 | Crypto | Pancake Stack | Solved | [Crypto/Pancake](Crypto/Pancake/README.md) &middot; [formatted](https://claude.ai/code/artifact/5cf42c9d-0835-43e6-b754-7973d443df7b) |
+| Crypto | Less is more | Solved | [Crypto/LessIsMore](Crypto/LessIsMore/README.md) &middot; [formatted](https://claude.ai/code/artifact/9decc08f-ed92-4cc5-9568-ebfc2f6d6b6e) |
