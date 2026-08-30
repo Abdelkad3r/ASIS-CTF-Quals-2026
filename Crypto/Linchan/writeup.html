@@ -1,0 +1,565 @@
+<title>Linchan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Fira+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* ---- tokens: light is the base; both dark states redefine ---- */
+  :root {
+    --ground: #F0F0F2;
+    --surface: #FCFCFB;
+    --panel: #F5F5F7;
+    --ink: #16161C;
+    --muted: #5B5B68;
+    --line: #D9D9E0;
+    --line-soft: #E6E6EB;
+    --structure: #33478A;       /* quiet structural blue */
+    --structure-soft: #E5E9F4;
+    --series: #4258A8;          /* chart base  - validated light step */
+    --accent: #C2410C;          /* the anomaly - validated light step */
+    --accent-soft: #FAE8DF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #131317;
+      --surface: #1A1A19;
+      --panel: #1E1E23;
+      --ink: #E7E7EC;
+      --muted: #92929E;
+      --line: #2C2C34;
+      --line-soft: #24242B;
+      --structure: #8FA6E4;
+      --structure-soft: #1C2235;
+      --series: #5B79D0;        /* validated dark step */
+      --accent: #D2762E;        /* validated dark step */
+      --accent-soft: #2B1F16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #131317;
+    --surface: #1A1A19;
+    --panel: #1E1E23;
+    --ink: #E7E7EC;
+    --muted: #92929E;
+    --line: #2C2C34;
+    --line-soft: #24242B;
+    --structure: #8FA6E4;
+    --structure-soft: #1C2235;
+    --series: #5B79D0;
+    --accent: #D2762E;
+    --accent-soft: #2B1F16;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.66;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 50rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.1rem, 4vw, 2.4rem) 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  h1, h2, h3 { font-family: "Crimson Pro", Georgia, serif; margin: 0; }
+  h1 {
+    font-size: clamp(2.6rem, 7vw, 3.9rem);
+    font-weight: 700; letter-spacing: -.02em; line-height: 1.0;
+    text-wrap: balance;
+  }
+  h2 { font-size: 1.55rem; font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+  h3 { font-size: 1.1rem; font-weight: 600; }
+  p { margin: 0; }
+  .lede {
+    font-family: "Crimson Pro", Georgia, serif;
+    font-size: 1.35rem; line-height: 1.45; color: var(--muted); max-width: 40ch;
+  }
+  .eyebrow, .cap, .chip, th, .idx {
+    font-family: "Public Sans", system-ui, sans-serif;
+  }
+  .eyebrow {
+    font-size: .69rem; font-weight: 600; letter-spacing: .17em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  strong { font-weight: 600; }
+
+  code, .mono {
+    font-family: "Fira Mono", ui-monospace, Menlo, monospace;
+    font-size: .82em;
+  }
+  code {
+    background: var(--structure-soft); color: var(--structure);
+    padding: .08em .32em; border-radius: 2px;
+  }
+  a { color: var(--structure); text-underline-offset: .18em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  header { display: flex; flex-direction: column; gap: 1.25rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    font-size: .71rem; font-weight: 500; padding: .26rem .6rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--muted); background: var(--surface);
+  }
+  .chip.mark { color: var(--accent); border-color: var(--accent); }
+
+  .code, .flagbox {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 3px; padding: .95rem 1.1rem; overflow-x: auto;
+  }
+  .code pre, .flagbox pre {
+    margin: 0; font-family: "Fira Mono", ui-monospace, Menlo, monospace;
+    font-size: .78rem; line-height: 1.62; color: var(--ink);
+  }
+  .cmt { color: var(--muted); }
+  .hl { color: var(--accent); font-weight: 500; }
+  .st { color: var(--structure); }
+  .cap {
+    display: block; font-size: .66rem; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .flagbox { background: var(--accent-soft); border-color: var(--accent); }
+  .flagbox pre {
+    color: var(--accent); font-weight: 500;
+    font-size: clamp(.72rem, 2.4vw, 1rem);
+  }
+
+  /* ---------------- rank-distribution chart ---------------- */
+  figure {
+    margin: 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 1.2rem 1.2rem 1rem;
+    display: flex; flex-direction: column; gap: .9rem;
+  }
+  .chart-title { font-family: "Crimson Pro", Georgia, serif; font-size: 1.15rem; font-weight: 600; }
+  .chart-sub { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+  .plot { position: relative; display: flex; flex-direction: column; gap: 2px; }
+  .grid { position: absolute; inset: 0 6.15rem 1.1rem 3.75rem; pointer-events: none; }
+  .grid span {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: var(--line-soft);
+  }
+  .bar {
+    display: grid; grid-template-columns: 3.2rem 1fr 5.6rem;
+    align-items: center; gap: .55rem;
+    font-family: "Fira Mono", ui-monospace, Menlo, monospace;
+    font-size: .72rem; font-variant-numeric: tabular-nums;
+    position: relative; border-radius: 2px;
+  }
+  .bar:hover { background: var(--panel); }
+  .bar .rk { color: var(--muted); text-align: right; }
+  .bar .track { height: 13px; position: relative; }
+  .bar .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--series); border-radius: 0 4px 4px 0;
+  }
+  .bar .val { color: var(--muted); text-align: right; }
+  .bar.anom .fill { background: var(--accent); }
+  .bar.anom .rk, .bar.anom .val { color: var(--accent); font-weight: 700; }
+  .axis {
+    display: grid; grid-template-columns: 3.2rem 1fr 5.6rem; gap: .55rem;
+    font-family: "Fira Mono", ui-monospace, Menlo, monospace;
+    font-size: .64rem; color: var(--muted); margin-top: .25rem;
+  }
+  .axis .ticks { position: relative; height: 1rem; }
+  .axis .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+  #tip {
+    position: fixed; z-index: 10; pointer-events: none; opacity: 0;
+    background: var(--ink); color: var(--ground);
+    font-family: "Fira Mono", ui-monospace, Menlo, monospace; font-size: .7rem;
+    padding: .4rem .55rem; border-radius: 3px; line-height: 1.5;
+    max-width: 20rem;
+  }
+
+  /* ---------------- steps & tables ---------------- */
+  .step {
+    display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem;
+    align-items: baseline; padding-top: 1.9rem; border-top: 1px solid var(--line-soft);
+  }
+  .step .idx {
+    font-size: .76rem; font-weight: 600; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .step .body { display: flex; flex-direction: column; gap: .95rem; min-width: 0; }
+  @media (max-width: 34rem) { .step { grid-template-columns: 1fr; gap: .3rem; } }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .42rem .65rem; border-bottom: 1px solid var(--line-soft); }
+  th {
+    font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td.mono, th.mono {
+    font-family: "Fira Mono", ui-monospace, Menlo, monospace; font-size: .76rem; white-space: nowrap;
+  }
+  td.k { color: var(--structure); }
+
+  .prose { display: flex; flex-direction: column; gap: 1rem; }
+  ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .5rem; }
+  li::marker { color: var(--accent); }
+
+  .note {
+    border-left: 2px solid var(--structure); padding: .05rem 0 .05rem 1rem;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .note h3 { color: var(--structure); font-size: .98rem; }
+
+  footer {
+    border-top: 1px solid var(--line-soft); padding-top: 1.3rem;
+    font-size: .83rem; color: var(--muted);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">ASIS CTF Quals 2026 &middot; Crypto</span>
+    <h1>Linchan</h1>
+    <p class="lede">Five secrets hidden as conjugate matrix subspaces over GF(2) &mdash;
+      and one rank anomaly that gives away all of them.</p>
+    <div class="meta">
+      <span class="chip">GF(2) linear algebra</span>
+      <span class="chip">MinRank</span>
+      <span class="chip">112 boxes</span>
+      <span class="chip">17 second solve</span>
+      <span class="chip mark">solved</span>
+    </div>
+    <div class="flagbox">
+      <span class="cap">Flag</span>
+      <pre>ASIS{Mr.__L1nChaN_h3aViEr__GFq2__ma7ch!nG_9aUntl3t!!?}</pre>
+    </div>
+  </header>
+
+  <section class="prose">
+    <h2>The whole challenge in one distribution</h2>
+    <p>Real subspaces are seeded with two matrices of rank exactly 25. Decoy subspaces are
+      uniform. This is how far out on the tail rank 25 sits:</p>
+
+    <figure>
+      <figcaption class="chart-title">Rank of a uniform 32&times;32 matrix over GF(2)</figcaption>
+      <div class="plot" id="plot">
+        <div class="grid">
+          <span style="left:75%"></span><span style="left:50%"></span><span style="left:25%"></span>
+        </div>
+        <div class="bar" data-p="0.288788" data-n="75,706"><span class="rk">32</span><span class="track"><span class="fill" style="width:97.30%"></span></span><span class="val">2.9e-01</span></div>
+        <div class="bar" data-p="0.577576" data-n="151,412"><span class="rk">31</span><span class="track"><span class="fill" style="width:98.81%"></span></span><span class="val">5.8e-01</span></div>
+        <div class="bar" data-p="0.128350" data-n="33,646"><span class="rk">30</span><span class="track"><span class="fill" style="width:95.55%"></span></span><span class="val">1.3e-01</span></div>
+        <div class="bar" data-p="0.00523879" data-n="1,373"><span class="rk">29</span><span class="track"><span class="fill" style="width:88.59%"></span></span><span class="val">5.2e-03</span></div>
+        <div class="bar" data-p="4.6567e-05" data-n="12.2"><span class="rk">28</span><span class="track"><span class="fill" style="width:78.34%"></span></span><span class="val">4.7e-05</span></div>
+        <div class="bar" data-p="9.69136e-08" data-n="0.025"><span class="rk">27</span><span class="track"><span class="fill" style="width:64.93%"></span></span><span class="val">9.7e-08</span></div>
+        <div class="bar" data-p="4.88353e-11" data-n="0.0000128"><span class="rk">26</span><span class="track"><span class="fill" style="width:48.45%"></span></span><span class="val">4.9e-11</span></div>
+        <div class="bar anom" data-p="6.05559e-15" data-n="0.0000000016"><span class="rk">25</span><span class="track"><span class="fill" style="width:28.91%"></span></span><span class="val">6.1e-15</span></div>
+        <div class="bar" data-p="1.86254e-19" data-n="0.00000000000005"><span class="rk">24</span><span class="track"><span class="fill" style="width:6.35%"></span></span><span class="val">1.9e-19</span></div>
+        <div class="axis">
+          <span></span>
+          <span class="ticks">
+            <span style="left:0">1e-20</span><span style="left:25%">1e-15</span>
+            <span style="left:50%">1e-10</span><span style="left:75%">1e-5</span>
+            <span style="left:100%">1</span>
+          </span>
+          <span></span>
+        </div>
+      </div>
+      <p class="chart-sub"><strong>Bars are logarithmic</strong> &mdash; each 25% of width is
+        five orders of magnitude. The highlighted row is the rank the generator plants.
+        Hover a row for the expected count inside one 18-dimensional subspace.</p>
+    </figure>
+
+    <p>A decoy subspace of dimension 18 holds 2<sup>18</sup> matrices, so its expected number
+      of rank-25 elements is <strong>1.6 &times; 10<sup>-9</sup></strong>. Across all 102
+      decoys, about 10<sup>-7</sup>. Every low-rank matrix you find is planted.</p>
+  </section>
+
+  <section class="step">
+    <span class="idx">01</span>
+    <div class="body">
+      <h2>Reading through the obfuscation</h2>
+      <p>The generator uses single-letter names throughout, but all of it is linear algebra
+        over GF(2), with a 32&times;32 matrix stored as 32 integers.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">Name</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono k">_r</td><td>rank of a set of vectors</td></tr>
+            <tr><td class="mono k">_m, _t, _i</td><td>matrix multiply, transpose, inverse</td></tr>
+            <tr><td class="mono k">_g()</td><td>uniform <strong>invertible</strong> 32&times;32 matrix</td></tr>
+            <tr><td class="mono k">_h()</td><td>32&times;25 times 25&times;32 &rarr; a matrix of <strong>rank exactly 25</strong></td></tr>
+            <tr><td class="mono k">_b(m, q)</td><td>basis of an m-dimensional subspace; if <code>q</code>, the first two elements come from <code>_h()</code></td></tr>
+            <tr><td class="mono k">_o(B)</td><td>re-express in a random basis, then transpose everything with probability &frac12;</td></tr>
+            <tr><td class="mono k">_f(S)</td><td>canonical form: min over <code>{S, S&#8315;&sup1;, S&#7488;, S&#8315;&#7488;}</code></td></tr>
+            <tr><td class="mono k">_k(K)</td><td>SHAKE-256 over the sorted canonical forms of the secrets</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">02</span>
+    <div class="body">
+      <h2>The scheme</h2>
+      <div class="code">
+<pre>_l = ((16, 2), (17, 2), (18, 1))     <span class="cmt"># (dimension, number of real pairs)</span>
+_d = 34                              <span class="cmt"># decoys per dimension</span>
+
+<span class="st">for</span> m, c <span class="st">in</span> _l:
+    <span class="st">for</span> _ <span class="st">in</span> range(c):
+        C, S = _b(m, <span class="hl">True</span>), _g()          <span class="cmt"># True -&gt; plant two rank-25 matrices</span>
+        D = [_m(_m(S, A), _i(S)) <span class="st">for</span> A <span class="st">in</span> C]  <span class="cmt"># D = S C S^-1</span>
+        B += [(m, _o(C)), (m, _o(D))]
+        K.append(S)
+    <span class="st">for</span> _ <span class="st">in</span> range(_d):
+        B.append((m, _o(_b(m))))              <span class="cmt"># decoy</span>
+shuffle(B)</pre>
+      </div>
+      <p>The output is <strong>112 boxes</strong>, each an m-dimensional subspace of the
+        1024-dimensional space of 32&times;32 matrices, handed over in a random basis and
+        transposed half the time. Ten of them form five conjugate pairs; the flag is
+        encrypted under a key derived from the five secret <code>S</code>.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">m</th><th>real boxes</th><th>decoys</th><th>total</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">16</td><td>4 (2 pairs)</td><td>34</td><td>38</td></tr>
+            <tr><td class="mono">17</td><td>4 (2 pairs)</td><td>34</td><td>38</td></tr>
+            <tr><td class="mono">18</td><td>2 (1 pair)</td><td>34</td><td>36</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <h3>What the key actually needs</h3>
+        <p><code>_f</code> quotients out <code>{S, S&#8315;&sup1;, S&#7488;, S&#8315;&#7488;}</code>
+          and the forms are sorted before hashing. Recovering any representative of each
+          class, in any order, is enough &mdash; which turns out to matter in step 08.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">03</span>
+    <div class="body">
+      <h2>The problem as intended</h2>
+      <p>You get two subspaces and the promise that one is a conjugate of the other &mdash;
+        but not which box pairs with which, not the basis correspondence, and not whether
+        either has been transposed. Solving
+        <code>X &middot; span(C) &middot; X&#8315;&sup1; = span(D)</code> head-on is bilinear:
+        you would have to find <code>X</code> and the m&times;m change of basis relating the
+        two spanning sets simultaneously.</p>
+      <p>The decoys sharpen it. With 38 boxes at one dimension there are 703 candidate
+        pairings, so any per-pair test has to be cheap.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">04</span>
+    <div class="body">
+      <h2>Why the seeding leaks</h2>
+      <p>Two properties make the rank anomaly at the top of this page fatal rather than
+        merely curious:</p>
+      <ul>
+        <li><strong>Rank belongs to the subspace, not to the basis.</strong>
+          <code>_o()</code> re-expresses the basis through a random invertible change of
+          basis. The set of elements is untouched, so the planted matrices are still in
+          there.</li>
+        <li><strong>Rank survives both conjugation and transposition.</strong>
+          <code>rank(S H S&#8315;&sup1;) = rank(H)</code> and
+          <code>rank(H&#7488;) = rank(H)</code>, so the marker reappears in the partner box
+          and survives <code>_o()</code>'s coin flip.</li>
+      </ul>
+      <p>Finding a low-rank element of a matrix subspace is the <strong>MinRank</strong>
+        problem, which is hard &mdash; asymptotically, in the dimension of the span. Here
+        m &le; 18.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">05</span>
+    <div class="body">
+      <h2>MinRank by exhaustion</h2>
+      <div class="code">
+<pre>38 &times; (2^16 - 1) + 38 &times; (2^17 - 1) + 36 &times; (2^18 - 1) = <span class="hl">16,908,176</span> matrices</pre>
+      </div>
+      <p>A short C helper walks each subspace in Gray-code order, so stepping to the next
+        element costs one XOR of 32 words, and ranks each with a 32-step elimination.</p>
+      <div class="code">
+<pre>[+] 112 boxes, 16,908,176 subspace elements to scan
+[+] MinRank: <span class="hl">20 matrices of rank &lt;= 26 in 10 boxes</span>
+[+] real boxes by dimension: {16: [49, 60, 82, 86], 17: [1, 47, 92, 106], 18: [32, 44]}</pre>
+      </div>
+      <p>Fourteen seconds, and exactly as predicted: 20 hits, all of rank exactly 25, two
+        per box, in ten boxes, splitting 4 / 4 / 2 across the dimensions &mdash; the shape of
+        <code>_l</code>. No false positives.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">06</span>
+    <div class="body">
+      <h2>Pairing the boxes</h2>
+      <p>Ten real boxes still need matching into five pairs. Conjugate matrices are similar,
+        so any similarity invariant works &mdash; provided it also survives transposition.
+        The rank sequence of the powers does both:</p>
+      <div class="code">
+<pre>fingerprint(H) = tuple(rank(H**k) <span class="st">for</span> k <span class="st">in</span> range(1, 13))</pre>
+      </div>
+      <p>Since <code>rank((S H S&#8315;&sup1;)&#7503;) = rank(H&#7503;)</code> and
+        <code>rank((H&#7503;)&#7488;) = rank(H&#7503;)</code>, a real pair has matching
+        fingerprint multisets and nothing else does.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">07</span>
+    <div class="body">
+      <h2>Recovering S is then linear</h2>
+      <p>Here the planted matrices pay off a second time. They are not only a marker &mdash;
+        they are <strong>canonically identifiable inside their own subspace</strong>, being
+        its only rank-25 elements. That removes the unknown change of basis entirely: up to
+        swapping the two, <code>G&#7522; = S H&#7522; S&#8315;&sup1;</code>.</p>
+      <p>The unknown is now only <code>S</code>, and the relation is linear in it:</p>
+      <div class="code">
+<pre>X &middot; H&#8321; = G&#8321; &middot; X
+X &middot; H&#8322; = G&#8322; &middot; X
+
+<span class="cmt">entry (i, j) of each, over the 1024 bits of X:</span>
+sum_k H[k][j] &middot; X[i][k]   xor   sum_k G[i][k] &middot; X[k][j]   =   0</pre>
+      </div>
+      <p>That is <strong>2048 equations in 1024 unknowns</strong> over GF(2) &mdash; one
+        Gaussian elimination. The solution space is
+        <code>S &middot; Centralizer(H&#8321;, H&#8322;)</code>, and two random rank-25
+        matrices generate the whole algebra M&#8323;&#8322;(GF(2)), whose centralizer is just
+        <code>{0, I}</code>. So the space should be one-dimensional and its single nonzero
+        element should be <code>S</code>. It is, for all five pairs:</p>
+      <div class="code">
+<pre>[+] m=16: box  49 ~ box  60   <span class="hl">solution space dim 1</span>, transposed=False
+[+] m=16: box  82 ~ box  86   <span class="hl">solution space dim 1</span>, transposed=True
+[+] m=17: box   1 ~ box  92   <span class="hl">solution space dim 1</span>, transposed=False
+[+] m=17: box  47 ~ box 106   <span class="hl">solution space dim 1</span>, transposed=False
+[+] m=18: box  32 ~ box  44   <span class="hl">solution space dim 1</span>, transposed=True</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">08</span>
+    <div class="body">
+      <h2>Transposition costs nothing</h2>
+      <p><code>_o()</code> transposes each box independently, so there are four combinations
+        to handle. There are not &mdash; only <em>one</em> side ever needs flipping. Writing
+        the true relation as <code>G&#7522; = S H&#7522; S&#8315;&sup1;</code> and setting
+        <code>Y = S&#7488; X</code>:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">box A</th><th class="mono">box B</th><th>flip A?</th><th>reduces to</th><th class="mono">X</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">H&#7522;</td><td class="mono">G&#7522;</td><td>no</td><td class="mono">X H&#7522; = G&#7522; X</td><td class="mono">S</td></tr>
+            <tr><td class="mono">H&#7522;&#7488;</td><td class="mono">G&#7522;</td><td>yes</td><td class="mono">X H&#7522; = G&#7522; X</td><td class="mono">S</td></tr>
+            <tr><td class="mono">H&#7522;</td><td class="mono">G&#7522;&#7488;</td><td>yes</td><td class="mono">Y H&#7522;&#7488; = H&#7522;&#7488; Y &rArr; Y = I</td><td class="mono">S&#8315;&#7488;</td></tr>
+            <tr><td class="mono">H&#7522;&#7488;</td><td class="mono">G&#7522;&#7488;</td><td>no</td><td class="mono">Y H&#7522;&#7488; = H&#7522;&#7488; Y &rArr; Y = I</td><td class="mono">S&#8315;&#7488;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Transposing <em>both</em> boxes is absorbed by the
+        <code>S &harr; S&#8315;&#7488;</code> symmetry, so a single boolean covers all four
+        cases &mdash; and it does not matter which of the two you land on, because
+        <code>_f</code> maps them to the same canonical form.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">09</span>
+    <div class="body">
+      <h2>Key and decryption</h2>
+      <p>ChaCha20-Poly1305, nonce in the first 12 bytes of the ciphertext, associated data
+        <code>b"linchan/v2"</code>. The <code>cryptography</code> package was not installed
+        on the solving machine, so the solver carries a small RFC 8439 implementation
+        instead &mdash; about 40 lines for both the stream cipher and the MAC.</p>
+      <div class="code">
+<pre>[+] key: c79d930f6691caace9686711a0d8b9e9590a16831b935f14fb5beb6a5c56b638
+[+] <span class="hl">Poly1305 tag valid: True</span>
+[+] flag: ASIS{Mr.__L1nChaN_h3aViEr__GFq2__ma7ch!nG_9aUntl3t!!?}</pre>
+      </div>
+      <p>The tag verifying is the part worth stressing: it is not a plausibility check on the
+        plaintext but a cryptographic confirmation that all five recovered matrices are
+        correct.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">10</span>
+    <div class="body">
+      <h2>Why the hook had to be there</h2>
+      <p>The rank-25 seeds are not a slip that can simply be deleted &mdash; they are
+        load-bearing. Remove them and every subspace is uniform, the boxes become
+        indistinguishable, and matching a conjugate pair means solving the bilinear
+        subspace-conjugacy problem across 703 candidates per dimension. The author needed a
+        canonical hook for the puzzle to have a solution at all.</p>
+      <p>The mistake is <em>which</em> hook. A rank anomaly at density 2<sup>-47</sup> is
+        visible to anyone who can enumerate the subspace, and m &le; 18 makes that a
+        fourteen-second scan. Worse, the same hook that separates real boxes from decoys also
+        fixes the correspondence <code>H&#7522; &rarr; G&#7522;</code> &mdash; the one piece
+        of information that turns the bilinear problem into a linear one. One marker solved
+        all three subproblems at once.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <span class="idx">&mdash;</span>
+    <div class="body">
+      <h2>Takeaways</h2>
+      <ul>
+        <li><strong>Ask what survives the obfuscation.</strong> <code>_o()</code> looks like
+          it hides the subspace, but a change of basis preserves every element of it. List
+          the quantities invariant under whatever scrambling a scheme applies, then check
+          whether the construction disturbs any of them.</li>
+        <li><strong>A distinguisher and a key recovery are often the same observation.</strong>
+          The low-rank elements identified the real boxes, paired them, <em>and</em> pinned
+          the basis correspondence. A marker canonical enough to find is usually canonical
+          enough to exploit.</li>
+        <li><strong>MinRank is only hard when the space is big.</strong> Its hardness is
+          asymptotic in the dimension of the span. At m &le; 18 the whole subspace fits in a
+          Gray-code loop and the security argument evaporates.</li>
+        <li><strong>Verify with the tag, not the plaintext.</strong> An AEAD hands you a free
+          proof of correctness &mdash; no eyeballing of ASCII required.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Crypto &middot; Linchan</span>
+    <span>Solver and challenge material: <code>Crypto/Linchan/</code></span>
+  </footer>
+
+</div>
+
+<div id="tip" role="status"></div>
+
+<script>
+  (function () {
+    var tip = document.getElementById("tip");
+    document.querySelectorAll(".bar").forEach(function (bar) {
+      var rank = bar.querySelector(".rk").textContent;
+      function show(e) {
+        tip.textContent = "rank " + rank + " · P = " + bar.dataset.p
+          + " · expected in one 2^18 subspace: " + bar.dataset.n;
+        tip.style.opacity = "1";
+        var pad = 12;
+        var x = Math.min(e.clientX + pad, window.innerWidth - tip.offsetWidth - pad);
+        tip.style.left = Math.max(pad, x) + "px";
+        tip.style.top = (e.clientY + pad) + "px";
+      }
+      bar.addEventListener("mousemove", show);
+      bar.addEventListener("mouseleave", function () { tip.style.opacity = "0"; });
+    });
+  })();
+</script>
