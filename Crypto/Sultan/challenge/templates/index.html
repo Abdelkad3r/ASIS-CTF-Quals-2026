@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sultan - Interactive Crypto Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: rgba(18, 24, 38, 0.85);
+      --bg-card-border: rgba(56, 189, 248, 0.18);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.10) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+    }
+
+    .title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 1rem;
+      padding: 1.75rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Stats Grid */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      font-family: var(--font-mono);
+    }
+
+    .stat-val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #fff;
+    }
+
+    .timer-val {
+      color: var(--accent-emerald);
+      transition: color 0.3s ease;
+    }
+
+    .timer-val.warning {
+      color: var(--accent-amber);
+    }
+
+    .timer-val.danger {
+      color: var(--accent-rose);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #fff;
+      box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* Form */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .input-text {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.6rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input-text:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Messages */
+    .msg-box {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .msg-box.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+
+    .msg-box.error {
+      display: block;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fb7185;
+    }
+
+    .flag-display {
+      margin-top: 0.75rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.75rem 1rem;
+      border-radius: 0.4rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #a7f3d0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.3rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="badge">⚡ ASIS CTF Quals • Crypto Challenge</div>
+      <h1 class="title">Sultan: Cryptographic Oracle</h1>
+      <p class="subtitle">
+        A secret value has been generated for your session. Analyze the oracle transcripts to recover the secret and claim the flag.
+      </p>
+    </div>
+
+    <!-- Stats & Live Session -->
+    <div class="card">
+      <div class="grid-stats">
+        <div class="stat-box">
+          <span class="stat-label">Session Window</span>
+          <span class="stat-val timer-val" id="timer-display">--:--</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Transcripts Generated</span>
+          <span class="stat-val" id="enc-count">{{ enc_count }}</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <a href="/download" id="download-btn" class="btn btn-primary" download="secret.enc">
+          📥 Download secret.enc
+        </a>
+        <button id="encrypt-btn" class="btn btn-secondary">
+          🔄 Request New Sample
+        </button>
+        <button id="reset-btn" class="btn btn-danger">
+          ⚠️ Reset Session (New Secret)
+        </button>
+      </div>
+    </div>
+
+    <!-- Verification Section -->
+    <div class="card">
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Submit Decrypted Secret</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+        Enter the recovered secret. If correct within your 20-minute session window, the flag will be revealed.
+      </p>
+
+      <form id="verify-form" class="form-group">
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="guess-input" 
+            class="input-text" 
+            placeholder="Enter recovered secret..." 
+            required 
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            Verify Secret
+          </button>
+        </div>
+      </form>
+
+      <div id="msg-box" class="msg-box">
+        <div id="msg-text"></div>
+        <div id="flag-container" class="flag-display" style="display: none;">
+          <span id="flag-text"></span>
+          <button class="copy-btn" id="copy-flag-btn">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Sultan Protocol • 2026 ASIS CTF
+    </div>
+  </div>
+
+  <script>
+    let remainingSeconds = {{ remaining_seconds }};
+    let timerInterval = null;
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timer-display');
+      display.textContent = formatTime(remainingSeconds);
+
+      display.classList.remove('warning', 'danger');
+      if (remainingSeconds <= 120) {
+        display.classList.add('danger');
+      } else if (remainingSeconds <= 300) {
+        display.classList.add('warning');
+      }
+
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        display.textContent = "00:00 (EXPIRED)";
+        showMessage("Session has expired (> 20 minutes). Click 'Reset Session' or request a new encryption to generate a fresh secret.", false);
+      }
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        if (remainingSeconds > 0) {
+          remainingSeconds--;
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    function showMessage(text, isSuccess, flag = null) {
+      const msgBox = document.getElementById('msg-box');
+      const msgText = document.getElementById('msg-text');
+      const flagContainer = document.getElementById('flag-container');
+      const flagText = document.getElementById('flag-text');
+
+      msgBox.className = 'msg-box ' + (isSuccess ? 'success' : 'error');
+      msgText.textContent = text;
+
+      if (isSuccess && flag) {
+        flagText.textContent = flag;
+        flagContainer.style.display = 'flex';
+      } else {
+        flagContainer.style.display = 'none';
+      }
+    }
+
+    // Verification Form Handler
+    document.getElementById('verify-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const guess = document.getElementById('guess-input').value.trim();
+      const submitBtn = document.getElementById('submit-btn');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
+
+      try {
+        const resp = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guess })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          showMessage(data.message, true, data.flag);
+        } else {
+          showMessage(data.message, false);
+          if (data.expired) {
+            refreshSessionData();
+          }
+        }
+      } catch (err) {
+        showMessage("An error occurred communicating with server.", false);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Verify Secret';
+      }
+    });
+
+    // Request new encryption button
+    document.getElementById('encrypt-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('encrypt-btn');
+      btn.disabled = true;
+      btn.textContent = 'Generating sample...';
+
+      try {
+        const resp = await fetch('/download');
+        const blob = await resp.blob();
+        
+        // Trigger download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.body.appendChild(document.createElement('a'));
+        a.href = url;
+        a.download = 'secret.enc';
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        await refreshSessionData();
+        showMessage("New sample downloaded successfully!", true);
+      } catch (err) {
+        showMessage("Failed to generate sample.", false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Request New Sample';
+      }
+    });
+
+    // Download button event
+    document.getElementById('download-btn').addEventListener('click', () => {
+      setTimeout(refreshSessionData, 500);
+    });
+
+    // Reset button
+    document.getElementById('reset-btn').addEventListener('click', async () => {
+      if (!confirm("Are you sure you want to reset your session? A new secret will be generated and the 20-minute timer will restart.")) {
+        return;
+      }
+      try {
+        const resp = await fetch('/api/reset', { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+          remainingSeconds = data.remaining_seconds;
+          document.getElementById('enc-count').textContent = '0';
+          document.getElementById('guess-input').value = '';
+          startTimer();
+          showMessage("Session reset. A new secret is ready.", true);
+        }
+      } catch (err) {
+        showMessage("Failed to reset session.", false);
+      }
+    });
+
+    // Refresh session metadata
+    async function refreshSessionData() {
+      try {
+        const resp = await fetch('/api/session');
+        const data = await resp.json();
+        document.getElementById('enc-count').textContent = data.enc_count;
+        remainingSeconds = data.remaining_seconds;
+        startTimer();
+      } catch (err) {
+        console.error("Session refresh error:", err);
+      }
+    }
+
+    // Copy flag button
+    document.getElementById('copy-flag-btn').addEventListener('click', () => {
+      const flag = document.getElementById('flag-text').textContent;
+      navigator.clipboard.writeText(flag);
+      document.getElementById('copy-flag-btn').textContent = 'Copied!';
+      setTimeout(() => {
+        document.getElementById('copy-flag-btn').textContent = 'Copy';
+      }, 2000);
+    });
+
+    // Start on load
+    startTimer();
+  </script>
+</body>
+</html>

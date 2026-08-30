@@ -14,3 +14,4 @@ Reproducible solutions and technical notes for ASIS CTF Quals 2026.
 | Crypto | Headache | Solved | [Crypto/Headache](Crypto/Headache/README.md) &middot; [formatted](https://claude.ai/code/artifact/b5e1e800-da8f-41d2-89da-11bb4f721cd6) |
 | Crypto | Pancake Stack | Solved | [Crypto/Pancake](Crypto/Pancake/README.md) &middot; [formatted](https://claude.ai/code/artifact/5cf42c9d-0835-43e6-b754-7973d443df7b) |
 | Crypto | Less is more | Solved | [Crypto/LessIsMore](Crypto/LessIsMore/README.md) &middot; [formatted](https://claude.ai/code/artifact/9decc08f-ed92-4cc5-9568-ebfc2f6d6b6e) |
+| Crypto | Sultan | Solved | [Crypto/Sultan](Crypto/Sultan/README.md) &middot; [formatted](https://claude.ai/code/artifact/987f9426-4fe0-47aa-9990-fe519c7ab697) |

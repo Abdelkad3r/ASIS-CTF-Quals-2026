@@ -1,0 +1,247 @@
+<title>The Sultan's Leaky Quorum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F4F3EE; --card:#FFFFFF; --sunk:#ECEAE1;
+    --ink:#17212B; --ink-soft:#3A4652; --muted:#697585;
+    --accent:#13657A; --accent-soft:#DCEEF1;
+    --gold:#9C6F16; --gold-soft:#F3E8CF;
+    --ok:#1C6B48; --ok-soft:#DFF0E7;
+    --bad:#AE2E33; --bad-soft:#F7E2E1;
+    --rule:#DEDBCF; --rule-soft:#E9E6DB;
+    --shadow:0 1px 2px rgba(23,33,43,.06),0 12px 30px -18px rgba(19,101,122,.30);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0C141C; --card:#131E28; --sunk:#182430;
+    --ink:#E9EEF3; --ink-soft:#C3CDD7; --muted:#8B98A6;
+    --accent:#48B4C6; --accent-soft:#0F2A31;
+    --gold:#E1BB63; --gold-soft:#2B2411;
+    --ok:#5FCB94; --ok-soft:#132A1F;
+    --bad:#FF8A83; --bad-soft:#331B1B;
+    --rule:#26333F; --rule-soft:#1C2833;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 14px 32px -18px rgba(0,0,0,.75);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0C141C; --card:#131E28; --sunk:#182430;
+    --ink:#E9EEF3; --ink-soft:#C3CDD7; --muted:#8B98A6;
+    --accent:#48B4C6; --accent-soft:#0F2A31;
+    --gold:#E1BB63; --gold-soft:#2B2411;
+    --ok:#5FCB94; --ok-soft:#132A1F;
+    --bad:#FF8A83; --bad-soft:#331B1B;
+    --rule:#26333F; --rule-soft:#1C2833;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 14px 32px -18px rgba(0,0,0,.75);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+  .wrap{max-width:830px;margin-inline:auto;padding:0 24px 96px}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+
+  .mast{padding:78px 0 34px;border-bottom:1px solid var(--rule)}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .eyebrow .sep{color:var(--rule)}
+  h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:clamp(48px,9vw,86px);line-height:1.0;letter-spacing:0;margin:14px 0 0;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--accent)}
+  .thesis{font-size:20px;color:var(--ink-soft);max-width:60ch;margin:20px 0 0;text-wrap:pretty}
+  .thesis b{color:var(--ink);font-weight:600}
+
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft);border-radius:8px;overflow:hidden;margin-top:32px}
+  .meta div{background:var(--card);padding:12px 15px}
+  .meta dt{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .meta dd{margin:0;font-size:15px;font-weight:600}
+  .meta dd.mono{font-size:13px;font-weight:500}
+
+  .flagbar{margin-top:14px;padding:15px 17px;border-radius:8px;background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 32%,transparent);display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+  .flagbar .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ok);font-weight:600}
+  .flagbar code{font-size:14px;color:var(--ink);word-break:break-all}
+
+  /* equation collapse */
+  .reveal{margin-top:34px;background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .reveal .lane{padding:18px 22px}
+  .reveal .lane+.lane{border-top:1px solid var(--rule-soft)}
+  .reveal .cap{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  .reveal .known .cap{color:var(--muted)} .reveal .out .cap{color:var(--accent)}
+  .reveal .f{font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.7;color:var(--ink-soft)}
+  .reveal .out .f{color:var(--ink);font-size:15px}
+  .reveal .out b{color:var(--accent);font-weight:600}
+  .reveal .out .g{color:var(--gold);font-weight:600}
+  .reveal .arrow{display:flex;justify-content:center;padding:2px 0 0;color:var(--accent);font-size:18px}
+
+  /* norm-gap bars */
+  .gap{margin:26px 0;background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);padding:18px 20px}
+  .gap .cap{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .bar{display:grid;grid-template-columns:112px 1fr 92px;align-items:center;gap:10px;margin:9px 0}
+  .bar .lab{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .bar .track{height:16px;background:var(--sunk);border-radius:8px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:8px}
+  .bar .val{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+  .bar.target .fill{background:var(--ok)} .bar.target .lab{color:var(--ok);font-weight:600}
+  .bar.gh .fill{background:var(--gold)}
+  .bar.lll .fill{background:var(--bad)} .bar.lll .lab{color:var(--bad)}
+  .gap .note{font-size:13.5px;color:var(--ink-soft);margin:12px 0 0;max-width:none}
+  .gap .note b{color:var(--accent)}
+
+  section{margin-top:60px;scroll-margin-top:24px}
+  h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:34px;letter-spacing:0;line-height:1.12;margin:0 0 6px;text-wrap:balance}
+  h2 .num{display:block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin-bottom:9px}
+  h3{font-size:17px;font-weight:600;margin:30px 0 6px;color:var(--ink)}
+  p{margin:14px 0;max-width:68ch}
+  ul,ol{max-width:68ch;padding-left:22px} li{margin:8px 0}
+  a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+  strong{font-weight:600}
+  code{font-size:.86em;background:var(--sunk);padding:.12em .38em;border-radius:4px;word-break:break-word}
+  pre{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:18px 0;box-shadow:var(--shadow)}
+  pre code{background:none;padding:0;border-radius:0;font-size:13px;line-height:1.6;color:var(--ink-soft);white-space:pre}
+  pre.term{background:var(--sunk)}
+  .c-dim{color:var(--muted)} .c-ok{color:var(--ok);font-weight:500} .c-acc{color:var(--accent);font-weight:600} .c-gold{color:var(--gold);font-weight:600}
+
+  .eqbox{margin:18px 0;padding:16px 18px;border:1px dashed var(--rule);border-radius:9px;background:var(--sunk)}
+  .eqbox .r{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--ink);margin:6px 0}
+  .callout{margin:22px 0;padding:16px 18px;border-radius:9px;background:var(--accent-soft);border-left:3px solid var(--accent)}
+  .callout p{margin:0;max-width:none}
+  .callout .tag2{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+
+  footer{margin-top:74px;padding-top:22px;border-top:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  @media(prefers-reduced-motion:no-preference){.bar .fill{animation:grow .8s cubic-bezier(.2,.7,.3,1) backwards}}
+  @keyframes grow{from{width:0 !important}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow"><span>ASIS CTF Quals 2026</span><span class="sep">/</span><span>Crypto</span><span class="sep">/</span><span>Medium–Hard</span></div>
+    <h1>The sultan's <em>leaky quorum</em>.</h1>
+    <p class="thesis">A lattice cipher whose whole key is a tiny secret <b>s</b> — and whose
+      "committee hints" quietly turn into <b>linear equations on s</b>. Seventy of them, six more than
+      needed. One BKZ reduction opens the vault.</p>
+
+    <dl class="meta">
+      <div><dt>Ring</dt><dd class="mono">Z_q[X]/(X⁶⁴+1)</dd></div>
+      <div><dt>Secret</dt><dd>64 coeffs in [-3,3]</dd></div>
+      <div><dt>Leak</dt><dd>⌊⟨A,u⟩ / b⌋ per session</dd></div>
+      <div><dt>Break</dt><dd>small-secret LWE · BKZ-30</dd></div>
+    </dl>
+
+    <div class="flagbar"><span class="lbl">Flag</span><code>ASIS{cORrup7_qu0ruM_rEu5e_!n_l4sT_ASIS_CTF!!}</code></div>
+
+    <div class="reveal">
+      <div class="lane known">
+        <p class="cap">each of 70 sessions publishes (all derivable from the public seed)</p>
+        <div class="f">c = _b(seed) &nbsp; A = _r(seed) &nbsp; v = u + c·s &nbsp; hint = ⌊ ⟨A, u⟩ / b ⌋</div>
+      </div>
+      <div class="arrow">↓ &nbsp; substitute &nbsp; u = v − c·s</div>
+      <div class="lane out">
+        <p class="cap">a linear equation on the secret</p>
+        <div class="f"><b>T<sub>j</sub></b> ≡ <b>M<sub>j</sub>·s</b> + r<sub>j</sub> &nbsp;(mod q), &nbsp; s ∈ [-3,3]⁶⁴, &nbsp; r<sub>j</sub> ∈ [0, b)</div>
+        <div class="f" style="margin-top:6px">70 samples · 64 unknowns · error &lt; 65000 ≪ q &nbsp;&rarr;&nbsp; <span class="g">small-secret LWE</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="tldr">
+    <h2><span class="num">TL;DR</span>Hints are equations</h2>
+    <p>The server hands out <code>secret.enc</code> for a per-session secret string. Each file derives
+      its entire symmetric key from a fresh module-LWE secret <code>s</code> and then leaks <code>s</code>
+      via 70 "committee" records. Substituting <code>u = v − c·s</code> converts every
+      <code>hint = ⌊⟨A,u⟩/b⌋</code> into <code>T_j ≡ M_j·s + r_j (mod q)</code> with a tiny secret and
+      <code>b</code>-bounded error — LWE that a Bai–Galbraith embedding + <strong>BKZ-30</strong> solves
+      in seconds. Then <code>k = SHAKE("SULTAN/key" ‖ s)</code> decrypts the string; verifying it returns
+      the flag.</p>
+  </section>
+
+  <section id="wrap-sec">
+    <h2><span class="num">01</span>The web wrapper</h2>
+    <p>A per-session <code>secret_string</code> (28–32 random alphanumerics, constant for 20 min) can be
+      downloaded as <code>encrypt_sultan(secret_string)</code> up to 500 times, or a <code>guess</code>
+      POSTed to <code>/api/verify</code> for the flag. Goal: <strong>recover the secret string from one
+      <code>secret.enc</code></strong>, then verify on the same cookie.</p>
+  </section>
+
+  <section id="cipher">
+    <h2><span class="num">02</span>The key is a function of a tiny lattice secret</h2>
+    <pre><code>q, n, ell, m, t, b = 8380417, 64, 1, 70, 16, 65000;  secret_bound = 3
+s = [_g(-3, 3) for _ in range(ell)]                     <span class="c-dim"># fresh; coeffs in [-3,3]</span>
+k = shake_256(b"SULTAN/key"    + _secret_bytes(s)).digest(32)      <span class="c-acc"># key = f(s) only</span>
+p = shake_256(b"SULTAN/stream" + k + nonce).digest(len(secret))
+e = secret XOR p                                        <span class="c-dim"># ciphertext of the string</span>
+d = blake2s(b"SULTAN/tag" + nonce + e, key=k)          <span class="c-dim"># MAC (lets us verify a candidate s)</span></code></pre>
+    <p>Multiplication <code>_p</code> is negacyclic in <code>R_q = Z_q[X]/(X⁶⁴+1)</code>. Recover
+      <code>s</code> ⇒ <code>k</code> ⇒ keystream ⇒ <code>secret = e ⊕ p</code>, with the BLAKE2s tag as
+      an offline oracle.</p>
+  </section>
+
+  <section id="leak">
+    <h2><span class="num">03</span>The committee hint is a linear equation</h2>
+    <pre><code>seed = x + y                                            <span class="c-dim"># x: 32 rand bytes, y: sorted 32-of-63 subset</span>
+u = [_g(0, q-1)]                                        <span class="c-dim"># fresh uniform mask</span>
+c = _b(seed)                                            <span class="c-dim"># sparse ±1, t=16 nonzeros</span>
+v = [_a(up, _p(c, sp))]                                 <span class="c-dim"># v = u + c*s   (published, but uniform)</span>
+record = x + y + pack(_i(_r(seed), u) // b) + _z(v)    <span class="c-acc"># hint = ⌊⟨A,u⟩ / b⌋</span></code></pre>
+    <p>With <code>A = _r(seed)</code> public and <code>u = v − c·s</code>:</p>
+    <div class="eqbox">
+      <div class="r">⟨A, u⟩ ≡ ⟨A, v⟩ − ⟨A, c·s⟩ &nbsp;(mod q)</div>
+      <div class="r">hint·b ≤ ⟨A,u⟩ &lt; hint·b + b &nbsp;&rArr;&nbsp; <span class="c-acc">M<sub>j</sub>·s + r<sub>j</sub> ≡ (⟨A,v⟩ − hint·b)</span> (mod q), &nbsp; r<sub>j</sub> ∈ [0,b)</div>
+    </div>
+    <p>The form <code>M_{j,k} = ⟨A_j, c_j·e_k⟩</code> is explicit — in <code>R_q</code>,
+      <code>(c·e_k)[i] = c[i−k]</code> for <code>i ≥ k</code> else <code>−c[i−k+n]</code> (the negacyclic
+      wrap, <code>X⁶⁴ = −1</code>).</p>
+    <div class="callout"><span class="tag2">why it's free</span>
+      <p>Each hint carries <code>log₂(q/b) ≈ 7</code> bits, so 70 samples give ≈490 bits of constraint on
+        a secret with only ≈180 bits of entropy. <code>s</code> is unique and wildly over-determined —
+        the only work is the lattice.</p>
+    </div>
+  </section>
+
+  <section id="lattice">
+    <h2><span class="num">04</span>The lattice — and why LLL isn't enough</h2>
+    <p>Bai–Galbraith primal (Kannan) embedding, dimension <code>n + m + 1 = 135</code>. Secret
+      coordinates are scaled by <code>Ws ≈ b/6</code> so the tiny secret and the <code>[0,b)</code> error
+      contribute comparable length; the error is centered at <code>b/2</code>:</p>
+    <pre><code>rows i&lt;n :  [ Ws·e_i | M[:,i]      | 0 ]
+rows n+j :  [   0    | q·e_j       | 0 ]
+last row :  [   0    | (T_j − b/2) | 1 ]     <span class="c-dim"># short vector encodes (−s, r−b/2, 1)</span></code></pre>
+    <div class="gap">
+      <p class="cap">Euclidean norm of the shortest vector each method reaches (dim 135)</p>
+      <div class="bar target"><span class="lab">target (s)</span><span class="track"><span class="fill" style="width:6%"></span></span><span class="val">≈ 2.4·10⁵</span></div>
+      <div class="bar gh"><span class="lab">Gaussian heur.</span><span class="track"><span class="fill" style="width:23%"></span></span><span class="val">≈ 9·10⁵</span></div>
+      <div class="bar lll"><span class="lab">plain LLL</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">≈ 4·10⁶</span></div>
+      <p class="note">The target sits <b>below</b> the Gaussian heuristic — a uSVP gap of ≈ 3.7 — but
+        plain LLL only reaches ~14× the heuristic. Progressive BKZ closes it: <b>BKZ-30 recovers s in
+        ~2 s</b>.</p>
+    </div>
+  </section>
+
+  <section id="exec">
+    <h2><span class="num">05</span>Execution</h2>
+    <pre class="term"><code>$ python3 solution/solve.py --selftest
+[selftest] recovered='iaCQb8DV3xowy475AeB462UY1fxYKVk' tag_ok=True MATCH=True
+
+$ python3 solution/pwn.py
+[*] downloaded secret.enc: 19608 bytes  (session uw1hEaOnIAmtR0wJ...)
+[*] recovered secret (30 chars, tag_ok=True) in 5.5s: 'fLyoSLn8rMz1UnXrEwQknVO0v0SZS6'
+<span class="c-ok">[+] FLAG: ASIS{cORrup7_qu0ruM_rEu5e_!n_l4sT_ASIS_CTF!!}</span></code></pre>
+    <p>Validated offline against locally-generated files (every recovery BLAKE2s-tag-verified) before
+      the live run.</p>
+  </section>
+
+  <section id="lessons">
+    <h2><span class="num">06</span>Lessons</h2>
+    <ul>
+      <li><strong>Don't leak high bits of a mask that also hides the secret.</strong> Publishing
+        <code>⌊⟨A,u⟩/b⌋</code> next to <code>v = u + c·s</code> makes every hint a linear equation on
+        <code>s</code> with <code>b</code>-bounded error.</li>
+      <li><strong>Toy parameters are toy security.</strong> <code>n=64</code>, <code>ℓ=1</code>, secret
+        width 3 — far below any real Dilithium level; BKZ-30 cracks it in seconds.</li>
+      <li><strong>Small-secret LWE with many hints is nearly free.</strong> 70 samples for 64 unknowns
+        (~7 bits each) leaves an enormous gap — the flag, <em>corrupt quorum reuse</em>, names it.</li>
+      <li><strong>A key that is a pure function of a recoverable value inherits its weakness.</strong>
+        <code>k = SHAKE(s)</code> means one lattice solve unlocks the whole authenticated cipher.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>ASIS CTF Quals 2026 &middot; Sultan &middot; Crypto</span>
+    <span>Solved by Abdelkad3r</span>
+  </footer>
+</div>
